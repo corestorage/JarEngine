@@ -56,8 +56,7 @@ import java.util.Enumeration;
 import java.util.Iterator;                                                            
 import java.util.List;                                                                
 import java.util.NoSuchElementException;                                              
-import java.util.Timer;                                                               
-import java.util.TimerTask; 
+import java.util.*;
 
 import javax.microedition.midlet.MIDletStateChangeException;
 import javax.swing.ImageIcon;
@@ -74,6 +73,7 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
+import javax.swing.Box;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -179,6 +179,12 @@ public class Main extends JFrame {
 
 	private ResizeDeviceDisplayDialog resizeDeviceDisplayDialog = null;
 
+	private JLabel upTimerLabel = new JLabel("00:00:00");
+	private long upTimerStartMillis = -1;
+	private javax.swing.Timer upTimer;
+
+	private JCheckBoxMenuItem menuTimerToggle;
+
 	protected EmulatorContext emulatorContext = new EmulatorContext() {
 
 		private InputMethod inputMethod = new J2SEInputMethod();
@@ -235,6 +241,7 @@ public class Main extends JFrame {
 				Config.setRecentDirectory("recentJadDirectory", fileChooser.getCurrentDirectory().getAbsolutePath());
 				String url = IOUtils.getCanonicalFileURL(fileChooser.getSelectedFile());
 				Common.openMIDletUrlSafe(url);
+				startUpTimerIfNotRunning();
 				if (recordStoreManagerDialog != null) {
 					recordStoreManagerDialog.refresh();
 				}
@@ -249,6 +256,7 @@ public class Main extends JFrame {
 			}
 			if (SwingDialogWindow.show(Main.this, "Enter MIDlet URL:", midletUrlPanel, true)) {
 				Common.openMIDletUrlSafe(midletUrlPanel.getText());
+				startUpTimerIfNotRunning();
 				if (recordStoreManagerDialog != null) {
 					recordStoreManagerDialog.refresh();
 				}
@@ -770,6 +778,7 @@ public class Main extends JFrame {
 				if (event instanceof JMRUMenu.MRUActionEvent) {
 					Common.openMIDletUrlSafe(((MidletURLReference) ((JMRUMenu.MRUActionEvent) event).getSourceMRU())
 							.getUrl());
+					startUpTimerIfNotRunning();
 					if (recordStoreManagerDialog != null) {
 						recordStoreManagerDialog.refresh();
 					}
@@ -984,7 +993,15 @@ public class Main extends JFrame {
 		menuBar.add(menuOptions);
 		menuBar.add(menuTools);
 		menuBar.add(menuHelp);
+		menuBar.add(Box.createHorizontalGlue()); // Pushes the next component to the right
+		menuBar.add(upTimerLabel);
 		setJMenuBar(menuBar);
+
+		// UpTimer is not running at launch
+		upTimerLabel.setText("0d0h0m0s");
+		upTimerLabel.setVisible(true);
+		upTimerRunning = false;
+		if (upTimer != null) upTimer.stop();
 
 		// Change window title
 		setTitle("JarEngine");
@@ -1068,6 +1085,24 @@ public class Main extends JFrame {
 		menuPersist.addActionListener(e -> {
 		    PersistMode.enabled = menuPersist.isSelected();
 		});
+
+		// Timer toggle
+		menuTimerToggle = new JCheckBoxMenuItem("Timer");
+		menuTimerToggle.setState(true);
+		menuTimerToggle.addActionListener(e -> {
+			boolean enabled = menuTimerToggle.getState();
+			upTimerLabel.setVisible(enabled);
+			if (enabled) {
+				if (upTimerRunning) {
+					upTimer.start();
+				}
+			} else {
+				if (upTimer != null) {
+					upTimer.stop();
+				}
+			}
+		});
+		menuTools.add(menuTimerToggle);
 	}
 
 	protected Component createContents(Container parent) {
@@ -1234,4 +1269,24 @@ public class Main extends JFrame {
 		}
 
 	}
+
+    private boolean upTimerRunning = false;
+    private void startUpTimerIfNotRunning() {
+        if (!upTimerRunning) {
+            upTimerStartMillis = System.currentTimeMillis();
+            if (upTimer == null) {
+                upTimer = new javax.swing.Timer(1000, e -> {
+                    long elapsed = System.currentTimeMillis() - upTimerStartMillis;
+                    long days = elapsed / (1000 * 60 * 60 * 24);
+                    long hours = (elapsed / (1000 * 60 * 60)) % 24;
+                    long minutes = (elapsed / (1000 * 60)) % 60;
+                    long seconds = (elapsed / 1000) % 60;
+                    upTimerLabel.setText(days + "d" + hours + "h" + minutes + "m" + seconds + "s");
+                });
+                upTimer.setInitialDelay(0);
+            }
+            upTimer.start();
+            upTimerRunning = true;
+        }
+    }
 }
