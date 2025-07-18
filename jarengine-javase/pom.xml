@@ -14,7 +14,6 @@
     </parent>
 
     <artifactId>jarengine-javase</artifactId>
-    <version>1.0.0</version>
     <name>jarengine-javase</name>
 
     <description>javase</description>

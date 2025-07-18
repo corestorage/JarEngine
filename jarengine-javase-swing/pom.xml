@@ -19,7 +19,16 @@
     <description>JarEngine desktop Swing build</description>
 
     <build>
-        <finalName>JarEngine-1.0.0</finalName>
+        <finalName>JarEngine-${project.version}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                    <include>version.txt</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

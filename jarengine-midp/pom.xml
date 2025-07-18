@@ -14,7 +14,6 @@
     </parent>
 
     <artifactId>jarengine-midp</artifactId>
-    <version>1.0.0</version>
     <name>jarengine-midp</name>
 
     <description>midp</description>

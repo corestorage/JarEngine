@@ -49,6 +49,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -135,6 +138,8 @@ import org.microemu.device.j2se.J2SEInputMethod;
 import org.microemu.log.Logger;
 import org.microemu.log.QueueAppender;
 import org.microemu.util.JadMidletEntry;
+import org.microemu.app.update.UpdateChecker;
+import javax.swing.SwingWorker;
 
 public class Main extends JFrame {
 
@@ -1081,6 +1086,72 @@ public class Main extends JFrame {
 			}
 		});
 		menuTools.add(menuTimerToggle);
+
+		// Add Update Emulator menu item
+		JMenuItem menuUpdate = new JMenuItem("Update Emulator");
+		menuUpdate.addActionListener(e -> {
+			new SwingWorker<Void, Void>() {
+				protected Void doInBackground() {
+					try {
+						String currentVersion = null;
+						// Try to read version.txt from JAR directory
+						try {
+							File jar = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+							File versionFile = new File(jar.getParentFile(), "version.txt");
+							if (versionFile.exists()) {
+								try (BufferedReader br = new BufferedReader(new FileReader(versionFile))) {
+									currentVersion = br.readLine().trim();
+								}
+							} else {
+								// Try resource
+								try (InputStream in = Main.class.getResourceAsStream("/version.txt")) {
+									if (in != null) {
+										BufferedReader br = new BufferedReader(new InputStreamReader(in));
+										currentVersion = br.readLine().trim();
+									}
+								}
+							}
+						} catch (Exception ex) {
+							// ignore, will show error below
+						}
+						final String currentVersionFinal = currentVersion;
+						if (currentVersionFinal == null) {
+							javax.swing.SwingUtilities.invokeLater(() ->
+								JOptionPane.showMessageDialog(Main.this, "Could not determine current version.", "Update Error", JOptionPane.ERROR_MESSAGE)
+							);
+							return null;
+						}
+						String latestVersion = UpdateChecker.getLatestVersion();
+						final String latestVersionFinal = latestVersion;
+						if (!UpdateChecker.isUpdateAvailable(currentVersionFinal, latestVersionFinal)) {
+							javax.swing.SwingUtilities.invokeLater(() ->
+								JOptionPane.showMessageDialog(Main.this, "You are already running the latest version (" + currentVersionFinal + ").", "No Update Available", JOptionPane.INFORMATION_MESSAGE)
+							);
+							return null;
+						}
+						int confirm = JOptionPane.showConfirmDialog(Main.this, "A new version (" + latestVersionFinal + ") is available. Update now?", "Update Available", JOptionPane.YES_NO_OPTION);
+						if (confirm != JOptionPane.YES_OPTION) return null;
+						File jar = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+						File dest = new File(jar.getParentFile(), "JarEngine-" + latestVersionFinal + ".jar.download");
+						final File destFinal = dest;
+						javax.swing.SwingUtilities.invokeLater(() ->
+							JOptionPane.showMessageDialog(Main.this, "Downloading update...\nThis may take a moment.", "Update", JOptionPane.INFORMATION_MESSAGE)
+						);
+						UpdateChecker.downloadUpdate(latestVersionFinal, destFinal);
+						javax.swing.SwingUtilities.invokeLater(() ->
+							JOptionPane.showMessageDialog(Main.this, "Update downloaded. The emulator will now restart.", "Update", JOptionPane.INFORMATION_MESSAGE)
+						);
+						UpdateChecker.applyUpdateAndRestart(destFinal, latestVersionFinal);
+					} catch (Exception ex) {
+						javax.swing.SwingUtilities.invokeLater(() ->
+							JOptionPane.showMessageDialog(Main.this, "Update failed: " + ex.getMessage(), "Update Error", JOptionPane.ERROR_MESSAGE)
+						);
+					}
+					return null;
+				}
+			}.execute();
+		});
+		menuOptions.add(menuUpdate);
 	}
 
 	protected Component createContents(Container parent) {
