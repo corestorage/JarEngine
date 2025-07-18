@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # MicroEmulator (JarEngine)
 
 MicroEmulator is a pure Java implementation of J2ME (MIDP/CLDC) for J2SE. It allows you to run and test Java ME MIDlet applications as standalone Java desktop apps or as applets.
@@ -61,3 +62,6 @@ Originally by Bartek Teodorczyk and contributors.
 ---
 
 For more details, see the legacy `README` file or the documentation in each module. 
+=======
+# JarEngine
+>>>>>>> 4dbbeb62c44b3b8b389921090735427db0a95056
