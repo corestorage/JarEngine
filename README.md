@@ -1,5 +1,8 @@
 # JarEngine
 
+![logo](https://github.com/user-attachments/assets/46e2219d-278a-4eda-a6c2-81411a8abfcd)
+
+
 **JarEngine** is a modern, modular, and open-source Java ME (J2ME) emulator, rebranded and improved from the classic MicroEmulator project. It enables you to run MIDlet (J2ME) applications and games on your desktop, with a focus on a clean Swing-based UI, extensibility, and developer-friendliness.
 
 ---
