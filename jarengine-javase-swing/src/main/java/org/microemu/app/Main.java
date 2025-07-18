@@ -74,6 +74,15 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
 import javax.swing.Box;
+import javax.swing.JDialog;
+import javax.swing.JTextField;
+import javax.swing.JPasswordField;
+import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.event.ItemEvent;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.FlatDarkLaf;
@@ -947,6 +956,13 @@ public class Main extends JFrame {
 		menuTools.add(menuPerformance);
 		JCheckBoxMenuItem menuPersist = new JCheckBoxMenuItem("Persist");
 		menuTools.add(menuPersist);
+		// Proxy menu item
+		JMenuItem menuProxy = new JMenuItem("Proxy");
+		menuProxy.addActionListener(e -> {
+			ProxySettingsDialog dialog = new ProxySettingsDialog(this);
+			dialog.setVisible(true);
+		});
+		menuTools.add(menuProxy);
 		menuBar.add(menuFile);
 		menuBar.add(menuOptions);
 		menuBar.add(menuTools);
@@ -1271,5 +1287,154 @@ public class Main extends JFrame {
             picturesDir = new File(userHome);
         }
         return picturesDir;
+    }
+}
+
+// Advanced Proxy Settings Dialog
+class ProxySettingsDialog extends JDialog {
+    private JComboBox<String> typeCombo;
+    private JTextField hostField;
+    private JTextField portField;
+    private JTextField userField;
+    private JPasswordField passField;
+    private JCheckBox enableBox;
+    private JLabel statusLabel;
+
+    public ProxySettingsDialog(JFrame parent) {
+        super(parent, "Proxy Settings", true);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        typeCombo = new JComboBox<>(new String[] {"HTTP", "SOCKS"});
+        hostField = new JTextField(20);
+        portField = new JTextField(6);
+        userField = new JTextField(15);
+        passField = new JPasswordField(15);
+        enableBox = new JCheckBox("Enable Proxy");
+        statusLabel = new JLabel();
+
+        gbc.gridx = 0; gbc.gridy = 0; add(new JLabel("Proxy Type:"), gbc);
+        gbc.gridx = 1; add(typeCombo, gbc);
+        gbc.gridx = 0; gbc.gridy++;
+        add(new JLabel("Host:"), gbc);
+        gbc.gridx = 1; add(hostField, gbc);
+        gbc.gridx = 0; gbc.gridy++;
+        add(new JLabel("Port:"), gbc);
+        gbc.gridx = 1; add(portField, gbc);
+        gbc.gridx = 0; gbc.gridy++;
+        add(new JLabel("Username:"), gbc);
+        gbc.gridx = 1; add(userField, gbc);
+        gbc.gridx = 0; gbc.gridy++;
+        add(new JLabel("Password:"), gbc);
+        gbc.gridx = 1; add(passField, gbc);
+        gbc.gridx = 0; gbc.gridy++;
+        add(enableBox, gbc);
+        gbc.gridx = 0; gbc.gridy++;
+        gbc.gridwidth = 2; add(statusLabel, gbc);
+
+        JPanel buttonPanel = new JPanel();
+        JButton applyBtn = new JButton("Apply");
+        JButton cancelBtn = new JButton("Cancel");
+        buttonPanel.add(applyBtn);
+        buttonPanel.add(cancelBtn);
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
+        add(buttonPanel, gbc);
+
+        // Load current proxy settings
+        loadCurrentSettings();
+
+        applyBtn.addActionListener(e -> {
+            if (enableBox.isSelected()) {
+                applyProxySettings();
+            } else {
+                clearProxySettings();
+            }
+            loadCurrentSettings();
+            setVisible(false);
+        });
+        cancelBtn.addActionListener(e -> setVisible(false));
+
+        setResizable(false);
+        pack();
+        setLocationRelativeTo(parent);
+    }
+
+    private void loadCurrentSettings() {
+        String type = System.getProperty("socksProxyHost") != null ? "SOCKS" : "HTTP";
+        typeCombo.setSelectedItem(type);
+        if (type.equals("SOCKS")) {
+            hostField.setText(System.getProperty("socksProxyHost", ""));
+            portField.setText(System.getProperty("socksProxyPort", ""));
+            userField.setText(System.getProperty("java.net.socks.username", ""));
+            passField.setText(System.getProperty("java.net.socks.password", ""));
+            enableBox.setSelected(System.getProperty("socksProxyHost") != null);
+        } else {
+            hostField.setText(System.getProperty("http.proxyHost", ""));
+            portField.setText(System.getProperty("http.proxyPort", ""));
+            userField.setText(System.getProperty("http.proxyUser", ""));
+            passField.setText(System.getProperty("http.proxyPassword", ""));
+            enableBox.setSelected(System.getProperty("http.proxyHost") != null);
+        }
+        updateStatus();
+    }
+
+    private void updateStatus() {
+        boolean enabled = enableBox.isSelected();
+        String type = (String) typeCombo.getSelectedItem();
+        String host = hostField.getText();
+        String port = portField.getText();
+        statusLabel.setText("Proxy " + (enabled ? "enabled" : "disabled") + (enabled ? (" (" + type + ": " + host + ":" + port + ")") : ""));
+    }
+
+    private void applyProxySettings() {
+        String type = (String) typeCombo.getSelectedItem();
+        String host = hostField.getText();
+        String port = portField.getText();
+        String user = userField.getText();
+        String pass = new String(passField.getPassword());
+        if (type.equals("SOCKS")) {
+            System.setProperty("socksProxyHost", host);
+            System.setProperty("socksProxyPort", port);
+            if (!user.isEmpty()) System.setProperty("java.net.socks.username", user);
+            else System.clearProperty("java.net.socks.username");
+            if (!pass.isEmpty()) System.setProperty("java.net.socks.password", pass);
+            else System.clearProperty("java.net.socks.password");
+            // Clear HTTP proxy
+            System.clearProperty("http.proxyHost");
+            System.clearProperty("http.proxyPort");
+            System.clearProperty("http.proxyUser");
+            System.clearProperty("http.proxyPassword");
+            System.clearProperty("https.proxyHost");
+            System.clearProperty("https.proxyPort");
+        } else {
+            System.setProperty("http.proxyHost", host);
+            System.setProperty("http.proxyPort", port);
+            System.setProperty("https.proxyHost", host);
+            System.setProperty("https.proxyPort", port);
+            if (!user.isEmpty()) System.setProperty("http.proxyUser", user);
+            else System.clearProperty("http.proxyUser");
+            if (!pass.isEmpty()) System.setProperty("http.proxyPassword", pass);
+            else System.clearProperty("http.proxyPassword");
+            // Clear SOCKS proxy
+            System.clearProperty("socksProxyHost");
+            System.clearProperty("socksProxyPort");
+            System.clearProperty("java.net.socks.username");
+            System.clearProperty("java.net.socks.password");
+        }
+    }
+
+    private void clearProxySettings() {
+        System.clearProperty("http.proxyHost");
+        System.clearProperty("http.proxyPort");
+        System.clearProperty("http.proxyUser");
+        System.clearProperty("http.proxyPassword");
+        System.clearProperty("https.proxyHost");
+        System.clearProperty("https.proxyPort");
+        System.clearProperty("socksProxyHost");
+        System.clearProperty("socksProxyPort");
+        System.clearProperty("java.net.socks.username");
+        System.clearProperty("java.net.socks.password");
     }
 }
