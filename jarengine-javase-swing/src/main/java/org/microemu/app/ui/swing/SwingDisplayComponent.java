@@ -81,7 +81,7 @@ public class SwingDisplayComponent extends JComponent implements DisplayComponen
 	private MouseAdapter mouseListener = new MouseAdapter() {
 
 		public void mousePressed(MouseEvent e) {
-			deviceComponent.requestFocus();
+			deviceComponent.requestFocusInWindow();
 			pressedPoint = e.getPoint();
 
 			if (MIDletBridge.getCurrentMIDlet() == null) {

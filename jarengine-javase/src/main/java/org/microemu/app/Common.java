@@ -132,6 +132,10 @@ public class Common implements MicroEmulator, CommonInterface {
 
     private boolean exitOnMIDletDestroy = false;
 
+    private Runnable destroyedCallback;
+
+    private Runnable startedCallback;
+
     public Common(EmulatorContext context) {
         instance = this;
         this.emulatorContext = context;
@@ -181,8 +185,13 @@ public class Common implements MicroEmulator, CommonInterface {
         return emulatorContext.getResourceAsStream(origClass, name);
     }
 
+    public void setDestroyedCallback(Runnable callback) {
+        this.destroyedCallback = callback;
+    }
+
     public void notifyDestroyed(MIDletContext midletContext) {
         Logger.debug("notifyDestroyed");
+        if (destroyedCallback != null) destroyedCallback.run();
         notifyImplementationMIDletDestroyed();
         startLauncher(midletContext);
     }
@@ -191,6 +200,7 @@ public class Common implements MicroEmulator, CommonInterface {
         if ((midletContext != null) && (MIDletBridge.getMIDletContext() == midletContext) && !midletContext.isLauncher()) {
             Logger.debug("destroyMIDletContext");
         }
+        if (destroyedCallback != null) destroyedCallback.run();
         MIDletThread.contextDestroyed(midletContext);
         synchronized (destroyNotify) {
             destroyNotify.notifyAll();
@@ -750,6 +760,7 @@ public class Common implements MicroEmulator, CommonInterface {
     }
 
     public void notifyImplementationMIDletStart() {
+        if (startedCallback != null) startedCallback.run();
         for (Iterator iterator = extensions.iterator(); iterator.hasNext();) {
             ImplementationInitialization impl = (ImplementationInitialization) iterator.next();
             impl.notifyMIDletStart();
@@ -1087,6 +1098,10 @@ public class Common implements MicroEmulator, CommonInterface {
         }
 
         return midlet;
+    }
+
+    public void setStartedCallback(Runnable callback) {
+        this.startedCallback = callback;
     }
 
     public static String usage() {

@@ -56,6 +56,7 @@ import java.util.TimerTask;
 import javax.microedition.lcdui.Command;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+import javax.swing.SwingUtilities;
 
 import org.microemu.DisplayAccess;
 import org.microemu.DisplayComponent;
@@ -74,7 +75,6 @@ import org.microemu.device.j2se.J2SEDeviceDisplay;
 import org.microemu.device.j2se.J2SEImmutableImage;
 import org.microemu.device.j2se.J2SEInputMethod;
 import org.microemu.device.j2se.J2SEMutableImage;
-import org.microemu.log.Logger;
 
 public class SwingDeviceComponent extends JPanel implements KeyListener, InputMethodListener, InputMethodRequests {
 
@@ -175,7 +175,7 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 	private MouseAdapter mouseListener = new MouseAdapter() {
 
 		public void mousePressed(MouseEvent e) {
-			requestFocus();
+			requestFocusInWindow();
 			mouseButtonDown = true;
 			pressedX = e.getX();
 			pressedY = e.getY();
@@ -307,11 +307,13 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 
 		addMouseListener(mouseListener);
 		addMouseMotionListener(mouseMotionListener);
-		
- 		//Input methods support begin
- 		enableInputMethods(true);
- 		addInputMethodListener(this);
- 		//End
+
+		setFocusTraversalKeysEnabled(false);
+
+		//Input methods support begin
+		enableInputMethods(true);
+		addInputMethodListener(this);
+		//End
 	}
 
 	public DisplayComponent getDisplayComponent() {
@@ -430,9 +432,7 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 						inputMethod.clipboardPaste((String) data);
 					}
 				} catch (UnsupportedFlavorException ex) {
-					Logger.error(ex);
 				} catch (IOException ex) {
-					Logger.error(ex);
 				}
 			}
 			return;
@@ -472,7 +472,6 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 				smartRepaint(new java.awt.Rectangle(r.x, r.y, r.width, r.height));
 			}
 		} else {
-			// Logger.debug0x("no button for KeyCode", ev.getKeyCode());
 		}
 		inputMethod.buttonPressed(button, keyChar);
 	}
@@ -510,7 +509,6 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 		if ((ev.getKeyCode() >= KeyEvent.VK_F1) && (ev.getKeyCode() <= KeyEvent.VK_F12)) {
 			keyChar = '\0';
 		}
-		// Logger.debug0x("keyReleased [" + keyChar + "]", keyChar);
 		inputMethod.buttonReleased(inputMethod.getButton(ev), keyChar);
 
 		prevOverButton = pressedButton;
@@ -669,6 +667,12 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 			javax.microedition.lcdui.Image img = device.getNormalImage();
 			return new Dimension(img.getWidth(), img.getHeight());
 		}
+	}
+
+	@Override
+	protected void processMouseEvent(MouseEvent e) {
+		super.processMouseEvent(e);
+		requestFocusInWindow();
 	}
 
 }

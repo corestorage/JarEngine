@@ -252,7 +252,6 @@ public class Main extends JFrame {
 				Config.setRecentDirectory("recentJadDirectory", fileChooser.getCurrentDirectory().getAbsolutePath());
 				String url = IOUtils.getCanonicalFileURL(fileChooser.getSelectedFile());
 				Common.openMIDletUrlSafe(url);
-				startUpTimerIfNotRunning();
 				if (recordStoreManagerDialog != null) {
 					recordStoreManagerDialog.refresh();
 				}
@@ -267,7 +266,6 @@ public class Main extends JFrame {
 			}
 			if (SwingDialogWindow.show(Main.this, "Enter MIDlet URL:", midletUrlPanel, true)) {
 				Common.openMIDletUrlSafe(midletUrlPanel.getText());
-				startUpTimerIfNotRunning();
 				if (recordStoreManagerDialog != null) {
 					recordStoreManagerDialog.refresh();
 				}
@@ -277,6 +275,7 @@ public class Main extends JFrame {
 
 	private ActionListener menuCloseMidletListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
+			stopUpTimer();
 			common.startLauncher(MIDletBridge.getMIDletContext());
 		}
 	};
@@ -509,6 +508,7 @@ public class Main extends JFrame {
 
 	private ActionListener menuExitListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
+			stopUpTimer();
 			synchronized (Main.this) {
 				if (encoder != null) {
 					encoder.finish();
@@ -736,6 +736,11 @@ public class Main extends JFrame {
 
 	public Main() {
 		this(null);
+		// Register destroyed and started callbacks with Common
+		if (common != null) {
+			common.setDestroyedCallback(this::notifyDestroyedCallback);
+			common.setStartedCallback(this::startUpTimerIfNotRunning);
+		}
 	}
 
 	public Main(DeviceEntry defaultDevice) {
@@ -768,7 +773,6 @@ public class Main extends JFrame {
 				if (event instanceof JMRUMenu.MRUActionEvent) {
 					Common.openMIDletUrlSafe(((MidletURLReference) ((JMRUMenu.MRUActionEvent) event).getSourceMRU())
 							.getUrl());
-					startUpTimerIfNotRunning();
 					if (recordStoreManagerDialog != null) {
 						recordStoreManagerDialog.refresh();
 					}
@@ -1245,22 +1249,35 @@ public class Main extends JFrame {
 	}
 
     private boolean upTimerRunning = false;
-    private void startUpTimerIfNotRunning() {
-        if (!upTimerRunning) {
-            upTimerStartMillis = System.currentTimeMillis();
-            if (upTimer == null) {
-                upTimer = new javax.swing.Timer(1000, e -> {
-                    long elapsed = System.currentTimeMillis() - upTimerStartMillis;
-                    long days = elapsed / (1000 * 60 * 60 * 24);
-                    long hours = (elapsed / (1000 * 60 * 60)) % 24;
-                    long minutes = (elapsed / (1000 * 60)) % 60;
-                    long seconds = (elapsed / 1000) % 60;
+    public void startUpTimerIfNotRunning() {
+        if (upTimerRunning) return;
+        upTimerStartMillis = System.currentTimeMillis();
+        if (upTimer == null) {
+            upTimer = new javax.swing.Timer(1000, e -> {
+                long elapsed = System.currentTimeMillis() - upTimerStartMillis;
+                long days = elapsed / (1000 * 60 * 60 * 24);
+                long hours = (elapsed / (1000 * 60 * 60)) % 24;
+                long minutes = (elapsed / (1000 * 60)) % 60;
+                long seconds = (elapsed / 1000) % 60;
+                if (upTimerLabel != null) {
                     upTimerLabel.setText(days + "d" + hours + "h" + minutes + "m" + seconds + "s");
-                });
-                upTimer.setInitialDelay(0);
-            }
-            upTimer.start();
-            upTimerRunning = true;
+                }
+            });
+            upTimer.setInitialDelay(0);
+        }
+        upTimer.start();
+        upTimerRunning = true;
+        if (upTimerLabel != null) upTimerLabel.setVisible(true);
+    }
+
+    public void stopUpTimer() {
+        if (upTimer != null) {
+            upTimer.stop();
+        }
+        upTimerRunning = false;
+        if (upTimerLabel != null) {
+            upTimerLabel.setText("0d0h0m0s");
+            upTimerLabel.setVisible(true);
         }
     }
 
@@ -1287,6 +1304,10 @@ public class Main extends JFrame {
             picturesDir = new File(userHome);
         }
         return picturesDir;
+    }
+
+    public void notifyDestroyedCallback() {
+        stopUpTimer();
     }
 }
 
