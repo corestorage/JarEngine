@@ -141,6 +141,7 @@ import javax.swing.SwingWorker;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.OceanTheme;
 import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 
 public class Main extends JFrame {
 
@@ -845,7 +846,7 @@ public class Main extends JFrame {
 		themeLight.setSelected(true);
 		themeLight.addActionListener(e -> {
 			try {
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				UIManager.setLookAndFeel(new FlatLightLaf());
 				SwingUtilities.updateComponentTreeUI(this);
 			} catch (Exception ex) {
 				Logger.error(ex);
@@ -1295,14 +1296,14 @@ public class Main extends JFrame {
 			return;
 		}
 
-		// Remove FlatLaf setup, use default look and feel
 		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			UIManager.setLookAndFeel(new FlatLightLaf());
 		} catch (Exception ex) {
 			Logger.error(ex);
 		}
 
 		final Main app = new Main();
+		SwingUtilities.updateComponentTreeUI(app);
 		if (args.length > 0) {
 			Logger.debug("arguments", debugArgs.toString());
 		}
