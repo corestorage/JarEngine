@@ -792,7 +792,7 @@ public class Common implements MicroEmulator, CommonInterface {
                 argsIterator.remove();
 
                 if ((arg.equals("--help")) || (arg.equals("-help"))) {
-                    System.out.println(usage());
+                    // Logger.info(usage());
                     System.exit(0);
                 } else if (arg.equals("--id")) {
                     Config.setEmulatorID((String) argsIterator.next());

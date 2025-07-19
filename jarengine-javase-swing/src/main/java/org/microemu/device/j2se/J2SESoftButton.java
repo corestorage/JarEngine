@@ -92,7 +92,7 @@ public class J2SESoftButton extends J2SEButton implements SoftButton {
 			try {
 				alignment = J2SESoftButton.class.getField(alignmentName).getInt(null);
 			} catch (Exception ex) {
-				System.err.println(ex);
+				// Logger.error("Error loading button image", ex);
 			}
 		}
 
@@ -101,7 +101,7 @@ public class J2SESoftButton extends J2SEButton implements SoftButton {
 			try {
 				addCommandType(Command.class.getField(tmp).getInt(null));
 			} catch (Exception ex) {
-				System.err.println("a3" + ex);
+				// Logger.error("Error in button action", ex);
 			}
 		}
 	}

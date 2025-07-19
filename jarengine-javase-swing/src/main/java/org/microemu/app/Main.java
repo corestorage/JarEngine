@@ -59,7 +59,8 @@ import java.util.Enumeration;
 import java.util.Iterator;                                                            
 import java.util.List;                                                                
 import java.util.NoSuchElementException;                                              
-import java.util.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.microedition.midlet.MIDletStateChangeException;
 import javax.swing.ImageIcon;
@@ -734,7 +735,7 @@ public class Main extends JFrame {
 			try {
 				MIDletBridge.getMIDletAccess(MIDletBridge.getCurrentMIDlet()).startApp();
 			} catch (MIDletStateChangeException ex) {
-				System.err.println(ex);
+				Logger.error("Error destroying MIDlet", ex);
 			}
 		}
 	};

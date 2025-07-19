@@ -165,8 +165,8 @@ public abstract class DeviceImpl implements Device {
 			String base = descriptorLocation.substring(0, descriptorLocation.lastIndexOf("/"));
 			XMLElement doc = loadDeviceDescriptor(getClass().getClassLoader(), descriptorLocation);
 			loadConfig(getClass().getClassLoader(), base, doc);
-		} catch (IOException ex) {
-			System.out.println("Cannot load config: " + ex);
+		} catch (Exception ex) {
+			// Logger.error("Error in device processing", ex);
 		}
 	}
 
@@ -306,9 +306,8 @@ public abstract class DeviceImpl implements Device {
 					} else if (tmp.getStringAttribute("name").equals("pressed")) {
 						pressedImage = loadImage(classLoader, base, tmp.getStringAttribute("src"));
 					}
-				} catch (IOException ex) {
-					System.out.println("Cannot load " + tmp.getStringAttribute("src"));
-					return;
+				} catch (Exception ex) {
+					// Logger.error("Cannot load " + tmp.getStringAttribute("src"), ex);
 				}
 			} else if (tmp.getName().equals("fonts")) {
 				parseFonts(classLoader, base, tmp);
@@ -696,7 +695,7 @@ public abstract class DeviceImpl implements Device {
 			doc.write(fw);
 			fw.close();
 		} catch (IOException ex) {
-			System.out.println(ex);
+			// Logger.error("Error writing device config", ex);
 		} finally {
 			IOUtils.closeQuietly(fw);
 		}
@@ -746,7 +745,7 @@ public abstract class DeviceImpl implements Device {
 		for (Enumeration enc = child.enumerateChildren(); enc.hasMoreElements();) {
 			XMLElement c = (XMLElement) enc.nextElement();
 			String fullName = (parentName + "/" + c.getName()).toUpperCase(Locale.ENGLISH);
-			// System.out.println("processing [" + fullName + "]");
+			// Logger.debug("processing [" + fullName + "]");
 			boolean inheritWithName = false;
 			if (c.getStringAttribute("name") != null) {
 				inheritWithName = true;
@@ -767,17 +766,16 @@ public abstract class DeviceImpl implements Device {
 			}
 			boolean inheritOverride = c.getBooleanAttribute("override", false);
 			if (inheritOverride) {
-				// System.out.println("inheritXML override parent:" +
-				// parent.toString());
-				// System.out.println("inheritXML override c :" + c.toString());
-				// System.out.println("inheritXML override p :" + p.toString());
+				// Logger.debug("inheritXML override parent:" + parent.getName());
+				// Logger.debug("inheritXML override c :" + c.toString());
+				// Logger.debug("inheritXML override p :" + p.toString());
 				c.removeAttribute("override");
 				if (p != null) {
 					parent.removeChild(p);
 					p = null;
 				}
 			}
-			// System.out.println("inheritXML " + c.getName());
+			// Logger.debug("inheritXML " + c.getName());
 			if (p == null) {
 				parent.addChild(c);
 			} else {

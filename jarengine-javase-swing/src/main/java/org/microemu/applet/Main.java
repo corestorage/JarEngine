@@ -267,7 +267,7 @@ public class Main extends Applet implements MicroEmulator {
 				try {
 					MIDletBridge.getMIDletAccess(midlet).startApp();
 				} catch (MIDletStateChangeException ex) {
-					System.err.println(ex);
+					Logger.error("Error starting MIDlet", ex);
 				}
 			}
 		}.start();
@@ -289,7 +289,7 @@ public class Main extends Applet implements MicroEmulator {
 		try {
 			MIDletBridge.getMIDletAccess(midlet).destroyApp(true);
 		} catch (MIDletStateChangeException ex) {
-			System.err.println(ex);
+			Logger.error("Error destroying MIDlet", ex);
 		}
 		// TODO handle this through ImplementationInitialization.notifyMIDletDestroyed()
 		try {

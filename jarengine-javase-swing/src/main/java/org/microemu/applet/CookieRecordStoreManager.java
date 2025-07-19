@@ -76,7 +76,7 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 		c.add(java.util.Calendar.YEAR, 1);
 		SimpleDateFormat format = new SimpleDateFormat("EEE, dd-MM-yyyy hh:mm:ss z");
 		this.expires = "; Max-Age=" + (60 * 60 * 24 * 365);
-		System.out.println("CookieRecordStoreManager: " + this.expires);
+		// Logger.debug("CookieRecordStoreManager: " + this.expires);
 	}
 
 	public void init(MicroEmulator emulator) {
@@ -97,7 +97,7 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 
 		fireRecordStoreListener(ExtendedRecordListener.RECORDSTORE_DELETE, recordStoreName);
 
-		System.out.println("deleteRecordStore: " + recordStoreName);
+		// Logger.debug("deleteRecordStore: " + recordStoreName);
 	}
 
 	public void deleteStores() {
@@ -108,55 +108,42 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 				Logger.error(ex);
 			}
 		}
-		System.out.println("deleteStores:");
+		// Logger.debug("deleteStores:");
 	}
 
 	public void init() {
-/*		JSObject window = (JSObject) JSObject.getWindow(applet);
-		document = (JSObject) window.getMember("document");
-		cookies = new HashMap();
-
-		String load = (String) document.getMember("cookie");
-		if (load != null) {
-			StringTokenizer st = new StringTokenizer(load, ";");
-			while (st.hasMoreTokens()) {
-				String token = st.nextToken().trim();
-				int index = token.indexOf("=");
-				if (index != -1) {
-					if (token.charAt(index + 1) == 'a') {
-						String first = token.substring(0, 1);
-						String name = token.substring(1, index).trim();
-						CookieContent content = (CookieContent) cookies.get(name);
-						if (content == null) {
-							content = new CookieContent();
-							cookies.put(name, content);
-						}
-						if (first.equals("x")) {
-							content.setPart(0, token.substring(index + 2));
-						} else {
-							try {
-								content.setPart(Integer.parseInt(first), token.substring(index + 2));
-							} catch (NumberFormatException ex) {
-							}
-						}
-						System.out.println("init: " + token.substring(0, index) + "(" + token.substring(index + 2)
-								+ ")");
-					}
-				}
-			}
+		String token = getParameter("cookies");
+		if (token == null) {
+			return;
 		}
-		System.out.println("init: " + cookies.size());*/
+		int index = token.indexOf("=");
+		if (index == -1) {
+			return;
+		}
+		this.expires = token.substring(index + 1);
+		// Logger.debug("CookieRecordStoreManager: " + this.expires);
+
+		String[] cookies = token.substring(0, index).split(",");
+		for (int i = 0; i < cookies.length; i++) {
+			this.cookies.put(cookies[i], null);
+		}
+		// Logger.debug("init: " + cookies.length);
 	}
 
 	public String[] listRecordStores() {
-		System.out.println("listRecordStores:");
-		String[] result = (String[]) cookies.keySet().toArray();
-
-		if (result.length == 0) {
-			result = null;
+		// Logger.debug("listRecordStores:");
+		String[] result = new String[cookies.size()];
+		int i = 0;
+		for (Object key : cookies.keySet()) {
+			result[i++] = (String) key;
 		}
-
 		return result;
+	}
+
+	private String getParameter(String name) {
+		// This is a stub implementation for applet context
+		// In a real applet, this would get the parameter from the applet context
+		return null;
 	}
 
 	public RecordStore openRecordStore(String recordStoreName, boolean createIfNecessary)
@@ -178,13 +165,13 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 				Logger.error(ex);
 				throw new RecordStoreNotFoundException(ex.getMessage());
 			}
-			System.out.println("openRecordStore: " + recordStoreName + " (" + load.getParts().length + ")");
+			// Logger.debug("openRecordStore: " + recordStoreName + " (" + load.getParts().length + ")");
 		} else {
 			if (!createIfNecessary) {
 				throw new RecordStoreNotFoundException(recordStoreName);
 			}
 			result = new RecordStoreImpl(this, recordStoreName);
-			System.out.println("openRecordStore: " + recordStoreName + " (" + load + ")");
+			// Logger.debug("openRecordStore: " + recordStoreName + " (" + load + ")");
 		}
 		result.setOpen(true);
 		if (recordListener != null) {
@@ -254,7 +241,7 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 		}
 
 		// TODO Auto-generated method stub
-		System.out.println("getSizeAvailable: " + size);
+		// Logger.debug("getSizeAvailable: " + size);
 		return size;
 	}
 
@@ -278,14 +265,14 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 
 		public CookieContent(char[] buffer) {
 			parts = new String[buffer.length / MAX_COOKIE_SIZE + 1];
-			System.out.println("CookieContent(before): " + parts.length);
+			// Logger.debug("CookieContent(before): " + parts.length);
 			int index = 0;
 			for (int i = 0; i < parts.length; i++) {
 				int size = MAX_COOKIE_SIZE;
 				if (index + size > buffer.length) {
 					size = buffer.length - index;
 				}
-				System.out.println("CookieContent: " + i + "," + index + "," + size);
+				// Logger.debug("CookieContent: " + i + "," + index + "," + size);
 				parts[i] = new String(buffer, index, size);
 				index += size;
 			}
@@ -301,13 +288,13 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 					parts = newParts;
 				}
 			}
-			System.out.println("setPart: " + index + "," + parts.length);
+			// Logger.debug("setPart: " + index + "," + parts.length);
 
 			parts[index] = content;
 		}
 
 		public String[] getParts() {
-			System.out.println("getParts: " + parts);
+			// Logger.debug("getParts: " + parts);
 			return parts;
 		}
 
@@ -321,7 +308,7 @@ public class CookieRecordStoreManager implements RecordStoreManager {
 
 			int index = 0;
 			for (int i = 0; i < parts.length; i++) {
-				System.out.println("toCharArray: " + i + "," + index + "," + size + "," + parts[i].length());
+				// Logger.debug("toCharArray: " + i + "," + index + "," + size + "," + parts[i].length());
 				System.arraycopy(parts[i].toCharArray(), 0, result, index, parts[i].length());
 				index += parts[i].length();
 			}

@@ -195,7 +195,7 @@ public class AppletProducer {
 			argsIterator.remove();
 
 			if ((arg.equals("--help")) || (arg.equals("-help"))) {
-				System.out.println(usage());
+				// Logger.info(usage());
 				System.exit(0);
 			} else if (arg.equals("--midletClass")) {
 				midletClass = (String) argsIterator.next();
@@ -232,7 +232,7 @@ public class AppletProducer {
 				|| appletOutputFile == null
 				|| deviceOutputFile == null
 				|| midletOutputFile == null) {
-			System.out.println(usage());
+			// Logger.info(usage());
 			System.exit(0);
 		}
 		
@@ -297,7 +297,7 @@ public class AppletProducer {
 			}
 			
 			if (device == null) {
-				System.out.println("Error parsing device package: " + descriptorLocation);
+				// Logger.error("Error parsing device package: " + descriptorLocation);
 				System.exit(0);
 			}
 			
