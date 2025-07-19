@@ -67,14 +67,49 @@ public class UpdateChecker {
         String[] command;
 
         if (isWindows) {
+            // Use a more robust Windows approach
             tempScript = File.createTempFile("updater", ".bat");
             scriptContent =
                     "@echo off\n" +
-                    "timeout /t 2 /nobreak > NUL\n" +
-                    "del \"" + currentJar.getAbsolutePath() + "\"\n" +
-                    "move /Y \"" + downloadedJar.getAbsolutePath() + "\" \"" + newJarFile.getAbsolutePath() + "\"\n" +
-                    "start \"\" /B \"" + javaBin + "\" -jar \"" + newJarFile.getAbsolutePath() + "\"\n" +
-                    "del \"" + tempScript.getAbsolutePath() + "\"\n" +
+                    "echo Waiting for JarEngine to exit...\n" +
+                    "timeout /t 3 /nobreak > NUL\n" +
+                    "\n" +
+                    "echo Attempting to replace JAR file...\n" +
+                    "\n" +
+                    "REM Try to delete existing file with force\n" +
+                    "if exist \"" + newJarFile.getAbsolutePath() + "\" (\n" +
+                    "    echo Removing existing file...\n" +
+                    "    del /F /Q \"" + newJarFile.getAbsolutePath() + "\" 2>NUL\n" +
+                    "    if exist \"" + newJarFile.getAbsolutePath() + "\" (\n" +
+                    "        echo File still exists, trying alternative method...\n" +
+                    "        timeout /t 2 /nobreak > NUL\n" +
+                    "        del /F /Q \"" + newJarFile.getAbsolutePath() + "\" 2>NUL\n" +
+                    "    )\n" +
+                    ")\n" +
+                    "\n" +
+                    "REM Try to move the downloaded file\n" +
+                    "echo Moving downloaded file...\n" +
+                    "move /Y \"" + downloadedJar.getAbsolutePath() + "\" \"" + newJarFile.getAbsolutePath() + "\" >NUL 2>&1\n" +
+                    "if errorlevel 1 (\n" +
+                    "    echo Move failed, trying copy and delete...\n" +
+                    "    copy /Y \"" + downloadedJar.getAbsolutePath() + "\" \"" + newJarFile.getAbsolutePath() + "\" >NUL 2>&1\n" +
+                    "    if not errorlevel 1 (\n" +
+                    "        del /F /Q \"" + downloadedJar.getAbsolutePath() + "\" >NUL 2>&1\n" +
+                    "    )\n" +
+                    ")\n" +
+                    "\n" +
+                    "REM Verify the new file exists\n" +
+                    "if exist \"" + newJarFile.getAbsolutePath() + "\" (\n" +
+                    "    echo Update successful! Starting JarEngine...\n" +
+                    "    start \"\" /B \"" + javaBin + "\" -jar \"" + newJarFile.getAbsolutePath() + "\"\n" +
+                    ") else (\n" +
+                    "    echo Update failed! Starting original JarEngine...\n" +
+                    "    start \"\" /B \"" + javaBin + "\" -jar \"" + currentJar.getAbsolutePath() + "\"\n" +
+                    ")\n" +
+                    "\n" +
+                    "echo Cleaning up...\n" +
+                    "timeout /t 1 /nobreak > NUL\n" +
+                    "del \"" + tempScript.getAbsolutePath() + "\" >NUL 2>&1\n" +
                     "exit\n";
             command = new String[]{"cmd.exe", "/c", tempScript.getAbsolutePath()};
         } else {
@@ -82,10 +117,18 @@ public class UpdateChecker {
             tempScript.setExecutable(true);
             scriptContent =
                     "#!/bin/bash\n" +
-                    "sleep 2\n" +
-                    "rm -f \"" + currentJar.getAbsolutePath() + "\"\n" +
+                    "echo \"Waiting for JarEngine to exit...\"\n" +
+                    "sleep 3\n" +
+                    "\n" +
+                    "echo \"Replacing JAR file...\"\n" +
+                    "rm -f \"" + newJarFile.getAbsolutePath() + "\"\n" +
                     "mv \"" + downloadedJar.getAbsolutePath() + "\" \"" + newJarFile.getAbsolutePath() + "\"\n" +
+                    "\n" +
+                    "echo \"Starting updated JarEngine...\"\n" +
                     "java -jar \"" + newJarFile.getAbsolutePath() + "\" &\n" +
+                    "\n" +
+                    "echo \"Cleaning up...\"\n" +
+                    "sleep 1\n" +
                     "rm \"" + tempScript.getAbsolutePath() + "\"\n";
             command = new String[]{"bash", tempScript.getAbsolutePath()};
         }

@@ -680,11 +680,30 @@ public class Main extends JFrame {
 		public void stateChanged(boolean state) {
 			menuOpenMIDletFile.setEnabled(state);
 			menuOpenMIDletURL.setEnabled(state);
-
+			
 			if (common.jad.getJarURL() != null) {
 				menuSaveForWeb.setEnabled(state);
 			} else {
 				menuSaveForWeb.setEnabled(false);
+			}
+			
+			// Update window title when MIDlet is loaded/unloaded
+			if (state) {
+				// MIDlet is loaded, update title with MIDlet name
+				try {
+					String midletName = common.getAppProperty("MIDlet-Name");
+					if (midletName != null && !midletName.trim().isEmpty()) {
+						updateTitle(midletName);
+					} else {
+						updateTitle(null);
+					}
+				} catch (Exception e) {
+					// Fallback to default title if there's an error
+					updateTitle(null);
+				}
+			} else {
+				// No MIDlet loaded, show default title
+				updateTitle(null);
 			}
 		}
 	};
@@ -987,10 +1006,16 @@ public class Main extends JFrame {
 		upTimerRunning = false;
 		if (upTimer != null) upTimer.stop();
 
-		// Change window title
+		// Change window title to simple format
 		setTitle("JarEngine");
 
+		// Set application icon
 		this.setIconImage(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/org/microemu/icon.png")));
+		
+		// Set professional window properties for better display
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setResizable(true);
+		setLocationRelativeTo(null); // Center on screen
 
 		addWindowListener(windowListener);
 		addWindowFocusListener(new java.awt.event.WindowAdapter() {
@@ -1153,6 +1178,15 @@ public class Main extends JFrame {
 			}.execute();
 		});
 		menuOptions.add(menuUpdate);
+	}
+
+	// Method to update title when MIDlet is loaded
+	public void updateTitle(String midletName) {
+		if (midletName != null && !midletName.trim().isEmpty()) {
+			setTitle(midletName);
+		} else {
+			setTitle("JarEngine");
+		}
 	}
 
 	protected Component createContents(Container parent) {
