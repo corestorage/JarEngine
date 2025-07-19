@@ -62,8 +62,6 @@ public class Config {
 
 	private static XMLElement configXml = new XMLElement();
 
-	private static DeviceEntry defaultDevice;
-
 	private static DeviceEntry resizableDevice;
 
 	private static EmulatorContext emulatorContext;
@@ -84,8 +82,7 @@ public class Config {
 		}
 	}
 
-	public static void loadConfig(DeviceEntry defaultDevice, EmulatorContext emulatorContext) {
-		Config.defaultDevice = defaultDevice;
+	public static void loadConfig(DeviceEntry device, EmulatorContext emulatorContext) {
 		Config.emulatorContext = emulatorContext;
 
 		File configFile = new File(getConfigPath(), "config2.xml");

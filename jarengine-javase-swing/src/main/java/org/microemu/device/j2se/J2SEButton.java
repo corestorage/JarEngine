@@ -79,7 +79,7 @@ public class J2SEButton implements Button {
 		if (skinVersion >= NAME_RIMARY_SINCE_SKIN_VERSION) {
 			this.functionalName = ButtonName.getButtonName(name);
 		} else {
-			this.functionalName = J2SEButtonDefaultKeyCodes.getBackwardCompatibleName(parseKeyboardKey(keyboardKeys));
+			this.functionalName = null; // No backward compatibility, fallback below
 			if (this.functionalName == null) {
 				this.functionalName = ButtonName.getButtonName(name);
 			}
@@ -115,12 +115,12 @@ public class J2SEButton implements Button {
 			}
 		}
 		if ((this.keyboardKeys == null) || (this.keyboardKeys.length == 0)) {
-			this.keyboardKeys = J2SEButtonDefaultKeyCodes.getKeyCodes(this.functionalName);
+			this.keyboardKeys = null; // No default key codes, rely on device.xml or leave null
 		}
 		if (keyboardChars != null) {
 			this.keyboardCharCodes = keyboardChars;
 		} else {
-			this.keyboardCharCodes = J2SEButtonDefaultKeyCodes.getCharCodes(this.functionalName);
+			this.keyboardCharCodes = null; // No default char codes, rely on device.xml or leave null
 		}
 
 		this.inputToChars = inputToChars;

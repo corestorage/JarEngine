@@ -83,15 +83,12 @@ import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButtonMenuItem;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.ItemEvent;
-
-import com.formdev.flatlaf.FlatLightLaf;
-import com.formdev.flatlaf.FlatDarkLaf;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButtonMenuItem;
 
 import org.microemu.DisplayAccess;
 import org.microemu.DisplayComponent;
@@ -141,6 +138,9 @@ import org.microemu.log.QueueAppender;
 import org.microemu.util.JadMidletEntry;
 import org.microemu.app.update.UpdateChecker;
 import javax.swing.SwingWorker;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.metal.OceanTheme;
+import com.formdev.flatlaf.FlatDarkLaf;
 
 public class Main extends JFrame {
 
@@ -845,7 +845,7 @@ public class Main extends JFrame {
 		themeLight.setSelected(true);
 		themeLight.addActionListener(e -> {
 			try {
-				UIManager.setLookAndFeel(new FlatLightLaf());
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				SwingUtilities.updateComponentTreeUI(this);
 			} catch (Exception ex) {
 				Logger.error(ex);
@@ -1295,9 +1295,9 @@ public class Main extends JFrame {
 			return;
 		}
 
+		// Remove FlatLaf setup, use default look and feel
 		try {
-			// Set FlatLaf Light as default
-			UIManager.setLookAndFeel(new FlatLightLaf());
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception ex) {
 			Logger.error(ex);
 		}
@@ -1307,6 +1307,7 @@ public class Main extends JFrame {
 			Logger.debug("arguments", debugArgs.toString());
 		}
 		
+		// Only use resizable device
 		if (app.common.initParams(params, new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false), J2SEDevice.class)) {
 			app.deviceEntry = new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false);
 			DeviceDisplayImpl deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();

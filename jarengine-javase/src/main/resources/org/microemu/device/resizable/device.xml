@@ -30,8 +30,6 @@
                 <width>12</width>
                 <height>12</height>
             </paintable>
-            <img name="normal" src="/org/microemu/device/default/up.png"/>
-            <img name="pressed" src="/org/microemu/device/default/up-pressed.png"/>
         </icon>
         <icon name="down">
             <paintable>
@@ -40,8 +38,6 @@
                 <width>12</width>
                 <height>12</height>
             </paintable>
-            <img name="normal" src="/org/microemu/device/default/down.png"/>
-            <img name="pressed" src="/org/microemu/device/default/down-pressed.png"/>
         </icon>
         <status name="input">
             <paintable>
@@ -50,9 +46,6 @@
                 <width>14</width>
                 <height>7</height>
             </paintable>
-            <img name="123" src="/org/microemu/device/default/123.png"/>
-            <img name="ABC" src="/org/microemu/device/default/abc_upper.png"/>
-            <img name="abc" src="/org/microemu/device/default/abc_lower.png"/>
         </status>
     </display>
     <fonts hint="antialiasing">
