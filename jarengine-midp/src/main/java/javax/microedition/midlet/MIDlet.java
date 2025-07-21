@@ -30,9 +30,9 @@ package javax.microedition.midlet;
 import javax.microedition.io.ConnectionNotFoundException;
 import javax.microedition.lcdui.Display;
 
-import org.microemu.DisplayAccess;
-import org.microemu.MIDletAccess;
-import org.microemu.MIDletBridge;
+import org.jarengine.DisplayAccess;
+import org.jarengine.MIDletAccess;
+import org.jarengine.MIDletBridge;
 
 public abstract class MIDlet {
 

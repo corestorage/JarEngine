@@ -25,8 +25,8 @@ package javax.microedition.lcdui;
 
 import java.util.Vector;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.ItemUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.ItemUI;
 
 public abstract class Item
 {

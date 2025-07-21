@@ -24,8 +24,8 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.CustomItemAccess;
-import org.microemu.device.DeviceFactory;
+import org.jarengine.CustomItemAccess;
+import org.jarengine.device.DeviceFactory;
 
 public class Spacer extends Item {
 	

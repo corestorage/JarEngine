@@ -1,6 +1,6 @@
 package javax.microedition.lcdui;
 
-import org.microemu.device.ui.DisplayableUI;
+import org.jarengine.device.ui.DisplayableUI;
 
 public class DisplayUtils
 {

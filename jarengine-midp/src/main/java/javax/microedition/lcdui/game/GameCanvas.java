@@ -22,9 +22,9 @@ package javax.microedition.lcdui.game;
 import javax.microedition.lcdui.Canvas;
 import javax.microedition.lcdui.Graphics;
 
-import org.microemu.GameCanvasKeyAccess;
-import org.microemu.MIDletBridge;
-import org.microemu.device.DeviceFactory;
+import org.jarengine.GameCanvasKeyAccess;
+import org.jarengine.MIDletBridge;
+import org.jarengine.device.DeviceFactory;
 
 
 /**

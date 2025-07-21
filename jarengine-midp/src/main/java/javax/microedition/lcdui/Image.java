@@ -28,7 +28,7 @@
 
 package javax.microedition.lcdui;
 import java.io.IOException;
-import org.microemu.device.DeviceFactory;
+import org.jarengine.device.DeviceFactory;
 
 
 public class Image

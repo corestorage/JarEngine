@@ -26,8 +26,8 @@
  */
 package javax.microedition.io;
 
-import org.microemu.SSLContextSetup;
-import org.microemu.TestEnvPropertiesHelper;
+import org.jarengine.SSLContextSetup;
+import org.jarengine.TestEnvPropertiesHelper;
 
 import junit.framework.TestCase;
 

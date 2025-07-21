@@ -38,13 +38,13 @@ import javax.microedition.lcdui.game.GameCanvas;
 
 import junit.framework.TestCase;
 
-import org.microemu.device.Device;
-import org.microemu.device.DeviceDisplay;
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.FontManager;
-import org.microemu.device.InputMethod;
-import org.microemu.device.MutableImage;
-import org.microemu.device.ui.UIFactory;
+import org.jarengine.device.Device;
+import org.jarengine.device.DeviceDisplay;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.FontManager;
+import org.jarengine.device.InputMethod;
+import org.jarengine.device.MutableImage;
+import org.jarengine.device.ui.UIFactory;
 
 /**
  * @author radoshi

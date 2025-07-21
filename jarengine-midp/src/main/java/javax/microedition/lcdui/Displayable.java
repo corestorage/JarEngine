@@ -26,10 +26,10 @@ package javax.microedition.lcdui;
 
 import java.util.Vector;
 
-import org.microemu.device.Device;
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.CommandUI;
-import org.microemu.device.ui.DisplayableUI;
+import org.jarengine.device.Device;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.CommandUI;
+import org.jarengine.device.ui.DisplayableUI;
 
 
 

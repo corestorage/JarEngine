@@ -24,7 +24,7 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
+import org.jarengine.device.DeviceFactory;
 
 class StringComponent {
 	private String text;

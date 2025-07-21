@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import org.microemu.microedition.ImplFactory;
+import org.jarengine.microedition.ImplFactory;
 
 public class Connector {
 

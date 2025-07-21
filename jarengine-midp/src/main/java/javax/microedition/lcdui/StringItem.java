@@ -24,8 +24,8 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.ImageStringItemUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.ImageStringItemUI;
 
 public class StringItem extends Item {
 
@@ -67,7 +67,7 @@ public class StringItem extends Item {
 	}
 
 	public void setText(String text) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidImageStringItemUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidImageStringItemUI")) {
 			((ImageStringItemUI) ui).setText(text);
 		}
 

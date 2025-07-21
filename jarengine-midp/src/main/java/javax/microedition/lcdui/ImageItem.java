@@ -20,8 +20,8 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.ImageStringItemUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.ImageStringItemUI;
 
 public class ImageItem extends Item {
 

@@ -36,13 +36,13 @@ import java.util.TimerTask;
 import javax.microedition.lcdui.game.GameCanvas;
 import javax.microedition.midlet.MIDlet;
 
-import org.microemu.DisplayAccess;
-import org.microemu.GameCanvasKeyAccess;
-import org.microemu.MIDletBridge;
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.DisplayableUI;
-import org.microemu.device.ui.EventDispatcher;
-import org.microemu.device.ui.ItemUI;
+import org.jarengine.DisplayAccess;
+import org.jarengine.GameCanvasKeyAccess;
+import org.jarengine.MIDletBridge;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.DisplayableUI;
+import org.jarengine.device.ui.EventDispatcher;
+import org.jarengine.device.ui.ItemUI;
 
 public class Display {
 

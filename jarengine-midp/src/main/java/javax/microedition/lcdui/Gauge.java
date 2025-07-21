@@ -23,8 +23,8 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.GaugeUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.GaugeUI;
 
 public class Gauge extends Item
 {
@@ -67,7 +67,7 @@ public class Gauge extends Item
 
 
   	public void setValue(int value) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidGaugeUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidGaugeUI")) {
 			((GaugeUI) ui).setValue(value);
 		} else {
 			if (hasIndefiniteRange()) {
@@ -103,7 +103,7 @@ public class Gauge extends Item
 
 
   	public int getValue() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidGaugeUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidGaugeUI")) {
 			return ((GaugeUI) ui).getValue();
 		} else {
 			return value;
@@ -112,7 +112,7 @@ public class Gauge extends Item
 
 
   	public void setMaxValue(int maxValue) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidGaugeUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidGaugeUI")) {
 			((GaugeUI) ui).setMaxValue(maxValue);
 		}
 		

@@ -5,4 +5,11 @@ plugins {
 dependencies {
     api project(':jarengine-midp')
     implementation 'asm:asm:3.1'
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*'
+    }
 } 

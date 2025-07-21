@@ -13,10 +13,10 @@ import java.util.Hashtable;
 
 import junit.framework.TestCase;
 
-import org.microemu.MicroEmulator;
-import org.microemu.RecordStoreManager;
-import org.microemu.util.ExtendedRecordListener;
-import org.microemu.util.RecordStoreImpl;
+import org.jarengine.MicroEmulator;
+import org.jarengine.RecordStoreManager;
+import org.jarengine.util.ExtendedRecordListener;
+import org.jarengine.util.RecordStoreImpl;
 
 /**
  * @author radoshi
@@ -203,7 +203,7 @@ public final class RecordStoreTest extends TestCase {
 	 */
 	public void testRecordComparator() throws Exception {
 
-		// TODO: this test illustrates that microemu implementation of
+		// TODO: this test illustrates that jarengine implementation of
 		// enumerate records is broken - ordering should be in
 		// increasing numeric order, not decreasing
 

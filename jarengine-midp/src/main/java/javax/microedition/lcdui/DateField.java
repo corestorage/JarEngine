@@ -24,8 +24,8 @@ import java.util.TimeZone;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.DateFieldUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.DateFieldUI;
 
 
 public class DateField extends Item
@@ -105,7 +105,7 @@ public class DateField extends Item
 
 
   	public Date getDate() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidDateFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidDateFieldUI")) {
 			return ((DateFieldUI) ui).getDate();
 		} else {
 			return date;
@@ -114,7 +114,7 @@ public class DateField extends Item
 
   	
 	public void setDate(Date date) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidDateFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidDateFieldUI")) {
 			((DateFieldUI) ui).setDate(date);
 		} else {
 			this.date = date;
@@ -137,7 +137,7 @@ public class DateField extends Item
 
 		this.mode = mode;
 		
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidDateFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidDateFieldUI")) {
 			((DateFieldUI) ui).setInputMode(mode);
 		} else {
 			dateTime = new ChoiceGroup(label, Choice.IMPLICIT, false);
@@ -158,7 +158,7 @@ public class DateField extends Item
 
     
 	int getHeight() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidDateFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidDateFieldUI")) {
 			return super.getHeight();
 		} else {
 			return super.getHeight() + dateTime.getHeight();
@@ -182,7 +182,7 @@ public class DateField extends Item
 	void setFocus(boolean state) {
 		super.setFocus(state);
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidDateFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidDateFieldUI")) {
 		} else {
 			dateTime.setFocus(state);
 		}

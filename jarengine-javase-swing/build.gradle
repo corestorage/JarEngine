@@ -3,7 +3,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
-mainClassName = 'org.microemu.app.Main'
+mainClassName = 'org.jarengine.app.Main'
 
 application {
     mainClass = mainClassName

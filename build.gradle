@@ -3,7 +3,7 @@ plugins {
 }
 
 allprojects {
-    group = 'org.microemu'
+    group = 'org.jarengine'
     version = '1.0.0'
     repositories {
         mavenCentral()

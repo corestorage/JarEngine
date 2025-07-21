@@ -23,9 +23,9 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.MIDletBridge;
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.ListUI;
+import org.jarengine.MIDletBridge;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.ListUI;
 
 public class List extends Screen implements Choice {
 
@@ -61,7 +61,7 @@ public class List extends Screen implements Choice {
         super(title);
         super.setUI(DeviceFactory.getDevice().getUIFactory().createListUI(this));
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
 			for (int i = 0; i < stringElements.length; i++) {
 				if (imageElements == null) {
 					append(stringElements[i], null);
@@ -88,7 +88,7 @@ public class List extends Screen implements Choice {
     }
 
     public int append(String stringPart, Image imagePart) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
 			return ((ListUI) ui).append(stringPart, imagePart);
 		} else {
 			return choiceGroup.append(stringPart, imagePart);
@@ -96,7 +96,7 @@ public class List extends Screen implements Choice {
     }
 
     public void delete(int elementNum) {
-      if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+      if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
         ((ListUI) ui).delete(elementNum);
       } else {
         choiceGroup.delete(elementNum);
@@ -104,7 +104,7 @@ public class List extends Screen implements Choice {
     }
 
     public void deleteAll() {
-      if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+      if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
         ((ListUI) ui).deleteAll();
       } else {
         choiceGroup.deleteAll();
@@ -128,7 +128,7 @@ public class List extends Screen implements Choice {
     }
 
     public int getSelectedIndex() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
 			return ((ListUI) ui).getSelectedIndex();
 		} else {
 			return choiceGroup.getSelectedIndex();
@@ -136,7 +136,7 @@ public class List extends Screen implements Choice {
     }
 
     public String getString(int elementNum) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
 			return ((ListUI) ui).getString(elementNum);
 		} else {
         	return choiceGroup.getString(elementNum);
@@ -144,7 +144,7 @@ public class List extends Screen implements Choice {
     }
 
     public void insert(int elementNum, String stringPart, Image imagePart) {
-    	if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+    	if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
     		((ListUI) ui).insert(elementNum, stringPart, imagePart);
     	} else {
     		choiceGroup.insert(elementNum, stringPart, imagePart);
@@ -161,7 +161,7 @@ public class List extends Screen implements Choice {
     }
 
     public void set(int elementNum, String stringPart, Image imagePart) {
-    	if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+    	if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
     		((ListUI) ui).set(elementNum, stringPart, imagePart);
     	} else {
     		choiceGroup.set(elementNum, stringPart, imagePart);
@@ -187,7 +187,7 @@ public class List extends Screen implements Choice {
     }
 
     public void setSelectedIndex(int elementNum, boolean selected) {
-      if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+      if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
         ((ListUI) ui).setSelectedIndex(elementNum, selected);
       } else {
         choiceGroup.setSelectedIndex(elementNum, selected);
@@ -260,7 +260,7 @@ public class List extends Screen implements Choice {
     }
 
     public int size() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
 			return ((ListUI) ui).size();
 		} else {
 			return choiceGroup.size();
@@ -270,7 +270,7 @@ public class List extends Screen implements Choice {
     void showNotify() {
         super.showNotify();
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidListUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidListUI")) {
 		} else {
 	        int selectedItemIndex = getSelectedIndex();
 	        int heightToItem = choiceGroup.getHeightToItem(selectedItemIndex);

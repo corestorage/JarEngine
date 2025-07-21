@@ -20,8 +20,8 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.CommandUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.CommandUI;
 
 public class Command {
 

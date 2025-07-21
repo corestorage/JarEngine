@@ -25,8 +25,8 @@ package javax.microedition.lcdui;
 
 import java.util.Vector;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.FormUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.FormUI;
 
 //TODO implement pointer events
 public class Form extends Screen 
@@ -60,7 +60,7 @@ public class Form extends Screen
 	{
 		verifyItem(item);
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidFormUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidFormUI")) {
 			((FormUI) ui).append(item.ui);
 		}
 		
@@ -108,7 +108,7 @@ public class Form extends Screen
 	{
 		verifyItemNum(itemNum);
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidFormUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidFormUI")) {
 			((FormUI) ui).delete(itemNum);
 		}
 
@@ -127,7 +127,7 @@ public class Form extends Screen
 	
 	public void deleteAll()
 	{
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidFormUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidFormUI")) {
 			((FormUI) ui).deleteAll();
 		}
 
@@ -168,7 +168,7 @@ public class Form extends Screen
 		}
 		verifyItem(item);
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidFormUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidFormUI")) {
 			((FormUI) ui).insert(itemNum, item.ui);
 		}
 
@@ -196,7 +196,7 @@ public class Form extends Screen
 		verifyItemNum(itemNum);
 		verifyItem(item);
 
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidFormUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidFormUI")) {
 			((FormUI) ui).set(itemNum, item.ui);
 		}
 

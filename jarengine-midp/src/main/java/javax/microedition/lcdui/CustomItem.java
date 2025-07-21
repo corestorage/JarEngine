@@ -19,9 +19,9 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.CustomItemAccess;
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.CustomItemUI;
+import org.jarengine.CustomItemAccess;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.CustomItemUI;
 
 public abstract class CustomItem extends Item {
 	protected static final int TRAVERSE_HORIZONTAL = 1;
@@ -121,7 +121,7 @@ public abstract class CustomItem extends Item {
 			return;
 		}
 		
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidCustomItemUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidCustomItemUI")) {
 			((CustomItemUI) ui).repaint();
 		} else {
 			super.repaint();

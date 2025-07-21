@@ -5,7 +5,7 @@
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="microemu-midp"/>
 <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.microemu.MIDP2APIDeclarationsTest"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.jarengine.MIDP2APIDeclarationsTest"/>
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
 </launchConfiguration>

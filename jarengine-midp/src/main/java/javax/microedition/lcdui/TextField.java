@@ -28,11 +28,11 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.InputMethod;
-import org.microemu.device.InputMethodEvent;
-import org.microemu.device.InputMethodListener;
-import org.microemu.device.ui.TextFieldUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.InputMethod;
+import org.jarengine.device.InputMethodEvent;
+import org.jarengine.device.InputMethodListener;
+import org.jarengine.device.ui.TextFieldUI;
 
 public class TextField extends Item 
 {
@@ -125,7 +125,7 @@ public class TextField extends Item
 	
 	public String getString() 
 	{
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextFieldUI")) {
 			return ((TextFieldUI) ui).getString();
 		}
 
@@ -135,7 +135,7 @@ public class TextField extends Item
 	
 	public void setString(String text) 
 	{
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextFieldUI")) {
 			((TextFieldUI) ui).setString(text);
 		}
 		
@@ -212,7 +212,7 @@ public class TextField extends Item
 		}
 		String newtext = "";
 		if (position > 0) {
-			if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextFieldUI")) {
+			if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextFieldUI")) {
 				newtext = ((TextFieldUI) ui).getString();
 			} else {
 				newtext = getString().substring(0, position);
@@ -220,13 +220,13 @@ public class TextField extends Item
 		}
 		newtext += src;
 		if (position < field.length()) {
-			if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextFieldUI")) {
+			if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextFieldUI")) {
 				newtext += ((TextFieldUI) ui).getString().substring(position + 1);
 			} else {
 				newtext += getString().substring(position + 1);
 			}
 		}	
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextFieldUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextFieldUI")) {
 			((TextFieldUI) ui).setString(newtext);
 		} else {
 			setString(newtext);

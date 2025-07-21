@@ -23,8 +23,8 @@
  
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.ChoiceGroupUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.ChoiceGroupUI;
 
 public class ChoiceGroup extends Item implements Choice
 {
@@ -164,7 +164,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
 	public void delete(int itemNum) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			((ChoiceGroupUI) ui).delete(itemNum);
 		} else {
 			if (itemNum < 0 || itemNum >= numOfItems) {
@@ -206,7 +206,7 @@ public class ChoiceGroup extends Item implements Choice
 	}
   
 	public void deleteAll() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			((ChoiceGroupUI) ui).deleteAll();
 		} else {
 			// clear the array to allow garbage collection
@@ -256,7 +256,7 @@ public class ChoiceGroup extends Item implements Choice
 	 * zero elements in the ChoiceGroup.
 	 */
 	public int getSelectedFlags(boolean[] selectedArray) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			return ((ChoiceGroupUI) ui).getSelectedFlags(selectedArray);
 		} else {
 			if (selectedArray == null) {
@@ -291,7 +291,7 @@ public class ChoiceGroup extends Item implements Choice
 	 * To get the complete state of a MULTIPLE Choice, see getSelectedFlags.
 	 */
 	public int getSelectedIndex() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			return ((ChoiceGroupUI) ui).getSelectedIndex();
 		} else {
 			switch (choiceType) {
@@ -315,7 +315,7 @@ public class ChoiceGroup extends Item implements Choice
 
   public String getString(int elementNum)
   {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			if (elementNum < 0 || elementNum >= ((ChoiceGroupUI) ui).size()) {
 				throw new IndexOutOfBoundsException();
 			}
@@ -333,7 +333,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
   	public void insert(int elementNum, String stringPart, Image imagePart) {
-		if (ui.getClass().getName().equals( "org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals( "org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			((ChoiceGroupUI) ui).insert(elementNum, stringPart, imagePart);
 		} else {
 			if (elementNum < 0 || elementNum > numOfItems) {
@@ -372,7 +372,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
   	public boolean isSelected(int elementNum) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			return ((ChoiceGroupUI) ui).isSelected(elementNum);
 		} else {
 			if (elementNum < 0 || elementNum >= numOfItems) {
@@ -385,7 +385,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
   	public void set(int elementNum, String stringPart, Image imagePart) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			((ChoiceGroupUI) ui).set(elementNum, stringPart, imagePart);
 		} else {
 			if (elementNum < 0 || elementNum >= numOfItems) {
@@ -435,7 +435,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
   	public void setSelectedFlags(boolean[] selectedArray) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			((ChoiceGroupUI) ui).setSelectedFlags(selectedArray);
 		} else {
 			if (selectedArray == null) {
@@ -474,7 +474,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
   	public void setSelectedIndex(int elementNum, boolean selected) {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			((ChoiceGroupUI) ui).setSelectedIndex(elementNum, selected);
 		} else {
 			if (elementNum < 0 || elementNum >= numOfItems) {
@@ -505,7 +505,7 @@ public class ChoiceGroup extends Item implements Choice
 
 
 	public int size() {
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidChoiceGroupUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidChoiceGroupUI")) {
 			return ((ChoiceGroupUI) ui).size();
 		} else {
 			return numOfItems;

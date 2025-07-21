@@ -24,7 +24,7 @@
  
 package javax.microedition.rms;
 
-import org.microemu.MIDletBridge;
+import org.jarengine.MIDletBridge;
 
 
 public class RecordStore 

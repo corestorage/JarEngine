@@ -22,7 +22,7 @@ package javax.microedition.lcdui;
 
 import java.util.Hashtable;
 
-import org.microemu.device.DeviceFactory;
+import org.jarengine.device.DeviceFactory;
 
 
 public final class Font 

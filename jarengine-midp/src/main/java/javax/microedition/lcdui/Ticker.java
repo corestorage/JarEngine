@@ -27,8 +27,8 @@
  
 package javax.microedition.lcdui;
 
-import org.microemu.DisplayAccess;
-import org.microemu.MIDletBridge;
+import org.jarengine.DisplayAccess;
+import org.jarengine.MIDletBridge;
 
 
 public class Ticker

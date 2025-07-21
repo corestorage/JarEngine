@@ -29,7 +29,7 @@ package javax.microedition.lcdui;
 
 import javax.microedition.lcdui.game.GameCanvas;
 
-import org.microemu.device.DeviceFactory;
+import org.jarengine.device.DeviceFactory;
 
 public abstract class Canvas extends Displayable
 {

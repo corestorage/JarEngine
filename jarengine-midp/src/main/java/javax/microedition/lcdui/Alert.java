@@ -23,8 +23,8 @@
  
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.ui.AlertUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.ui.AlertUI;
 
 
 public class Alert extends Screen
@@ -193,7 +193,7 @@ public class Alert extends Screen
 
 	public void setString(String str)
 	{
-		if (ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidAlertUI")) {
+		if (ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidAlertUI")) {
 			((AlertUI) ui).setString(str);
 		}
 		

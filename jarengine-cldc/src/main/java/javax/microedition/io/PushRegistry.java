@@ -29,8 +29,8 @@ package javax.microedition.io;
 
 import java.io.IOException;
 
-import org.microemu.microedition.ImplFactory;
-import org.microemu.microedition.io.PushRegistryDelegate;
+import org.jarengine.microedition.ImplFactory;
+import org.jarengine.microedition.io.PushRegistryDelegate;
 
 public class PushRegistry {
 

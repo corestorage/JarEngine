@@ -24,11 +24,11 @@
 
 package javax.microedition.lcdui;
 
-import org.microemu.device.DeviceFactory;
-import org.microemu.device.InputMethod;
-import org.microemu.device.InputMethodEvent;
-import org.microemu.device.InputMethodListener;
-import org.microemu.device.ui.TextBoxUI;
+import org.jarengine.device.DeviceFactory;
+import org.jarengine.device.InputMethod;
+import org.jarengine.device.InputMethodEvent;
+import org.jarengine.device.InputMethodListener;
+import org.jarengine.device.ui.TextBoxUI;
 
 //TODO implement pointer events
 public class TextBox extends Screen {
@@ -73,7 +73,7 @@ public class TextBox extends Screen {
 	}
 
 	public void delete(int offset, int length) {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			((TextBoxUI) ui).delete(offset, length);
 		} else {
 			tf.delete(offset, length);
@@ -81,7 +81,7 @@ public class TextBox extends Screen {
 	}
 
 	public int getCaretPosition() {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			return ((TextBoxUI) ui).getCaretPosition();
 		} else {
 			return tf.getCaretPosition();
@@ -101,7 +101,7 @@ public class TextBox extends Screen {
 	}
 
 	public String getString() {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			return ((TextBoxUI) ui).getString();
 		} else {
 			return tf.getString();
@@ -113,7 +113,7 @@ public class TextBox extends Screen {
 	}
 
 	public void insert(String src, int position) {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			((TextBoxUI) ui).insert(src, position);
 		} else {
 			tf.insert(src, position);
@@ -137,7 +137,7 @@ public class TextBox extends Screen {
 	}
 
 	public void setString(String text) {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			((TextBoxUI) ui).setString(text);
 		} else {
 			tf.setString(text);
@@ -153,7 +153,7 @@ public class TextBox extends Screen {
 	}
 
 	public int size() {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			return ((TextBoxUI) ui).getString().length();
 		} else {
 			return tf.size();
@@ -166,7 +166,7 @@ public class TextBox extends Screen {
 	}
 
 	int paintContent(Graphics g) {
-		if (ui != null && ui.getClass().getName().equals("org.microemu.android.device.ui.AndroidTextBoxUI")) {
+		if (ui != null && ui.getClass().getName().equals("org.jarengine.android.device.ui.AndroidTextBoxUI")) {
 			return 0;
 		} else {
 			g.translate(0, viewPortY);
