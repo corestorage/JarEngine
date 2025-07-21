@@ -148,7 +148,6 @@ import javax.swing.JScrollPane;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.event.MouseAdapter;
-import javax.swing.JMenuBar;
 
 public class Main extends JFrame {
 
@@ -156,7 +155,8 @@ public class Main extends JFrame {
 
 	protected Common common;
 
-	private MIDletUrlPanel midletUrlPanel = null;
+	// Only keep devicePanel and fields needed for minimal UI
+	private SwingDeviceComponent devicePanel;
 
 	private JFileChooser saveForWebChooser;
 
@@ -166,10 +166,6 @@ public class Main extends JFrame {
 
 	private JFrame scaledDisplayFrame;
 
-	private SwingDeviceComponent devicePanel;
-
-	private SwingLogConsoleDialog logConsoleDialog;
-
 	private RecordStoreManagerDialog recordStoreManagerDialog;
 
 	private QueueAppender logQueueAppender;
@@ -177,15 +173,6 @@ public class Main extends JFrame {
 	private DeviceEntry deviceEntry;
 
 	private AnimatedGifEncoder encoder;
-
-	private JLabel statusBar = new JLabel("Status");
-
-	private ResizeDeviceDisplayDialog resizeDeviceDisplayDialog = null;
-
-	private JLabel upTimerLabel = new JLabel("00:00:00");
-	private JToolBar toolbar;
-	private long upTimerStartMillis = -1;
-	private javax.swing.Timer upTimer;
 
 	private File captureFile;
 
@@ -245,20 +232,6 @@ public class Main extends JFrame {
 				Config.setRecentDirectory("recentJadDirectory", fileChooser.getCurrentDirectory().getAbsolutePath());
 				String url = IOUtils.getCanonicalFileURL(fileChooser.getSelectedFile());
 				Common.openMIDletUrlSafe(url);
-				if (recordStoreManagerDialog != null) {
-					recordStoreManagerDialog.refresh();
-				}
-			}
-		}
-	};
-
-	private ActionListener menuOpenMIDletURLListener = new ActionListener() {
-		public void actionPerformed(ActionEvent ev) {
-			if (midletUrlPanel == null) {
-				midletUrlPanel = new MIDletUrlPanel();
-			}
-			if (SwingDialogWindow.show(Main.this, "Enter MIDlet URL:", midletUrlPanel, true)) {
-				Common.openMIDletUrlSafe(midletUrlPanel.getText());
 				if (recordStoreManagerDialog != null) {
 					recordStoreManagerDialog.refresh();
 				}
@@ -476,25 +449,6 @@ public class Main extends JFrame {
 		}
 	};
 
-	private ActionListener menuLogConsoleListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			if (logConsoleDialog == null) {
-				logConsoleDialog = new SwingLogConsoleDialog(Main.this, Main.this.logQueueAppender);
-				logConsoleDialog.addWindowListener(new WindowAdapter() {
-					public void windowClosing(WindowEvent e) {
-						// Remove menu field reference - this will be handled by toolbar button
-					}
-				});
-				logConsoleDialog.pack();
-				// To avoid NPE on MacOS setFocusableWindowState(false) have to be called after pack()
-				logConsoleDialog.setFocusableWindowState(false);
-				Rectangle window = Config.getWindow("logConsole", new Rectangle(0, 0, 640, 320));
-				logConsoleDialog.setBounds(window.x, window.y, window.width, window.height);
-			}
-			logConsoleDialog.setVisible(!logConsoleDialog.isVisible());
-		}
-	};
-
 	private ActionListener menuAboutListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			SwingDialogWindow.show(Main.this, "About", new SwingAboutDialog(), false);
@@ -511,10 +465,6 @@ public class Main extends JFrame {
 				}
 			}
 
-			if (logConsoleDialog != null) {
-				Config.setWindow("logConsole", new Rectangle(logConsoleDialog.getX(), logConsoleDialog.getY(),
-						logConsoleDialog.getWidth(), logConsoleDialog.getHeight()), logConsoleDialog.isVisible());
-			}
 			if (recordStoreManagerDialog != null) {
 				Config.setWindow("recordStoreManager", new Rectangle(recordStoreManagerDialog.getX(),
 						recordStoreManagerDialog.getY(), recordStoreManagerDialog.getWidth(), recordStoreManagerDialog
@@ -541,14 +491,6 @@ public class Main extends JFrame {
 		}
 	};
 
-	private StatusBarListener statusBarListener = new StatusBarListener() {
-		public void statusBarChanged(String text) {
-			FontMetrics metrics = statusBar.getFontMetrics(statusBar.getFont());
-			statusBar.setPreferredSize(new Dimension(metrics.stringWidth(text), metrics.getHeight()));
-			statusBar.setText(text);
-		}
-	};
-
 	private ResponseInterfaceListener responseInterfaceListener = new ResponseInterfaceListener() {
 		public void stateChanged(boolean state) {
 			// Remove menu field references - these will be handled by toolbar buttons
@@ -570,39 +512,6 @@ public class Main extends JFrame {
 			} else {
 				// No MIDlet loaded, show default title
 				updateTitle(null);
-			}
-		}
-	};
-
-	private ComponentListener componentListener = new ComponentAdapter() {
-		Timer timer;
-
-		int count = 0;
-
-		public void componentResized(ComponentEvent e) {
-			count++;
-			DeviceDisplayImpl deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();
-			if (deviceDisplay.isResizable()) {
-			    setDeviceSize(deviceDisplay, devicePanel.getWidth(), devicePanel.getHeight());
-				devicePanel.revalidate();
-				statusBarListener.statusBarChanged("New size: " + deviceDisplay.getFullWidth() + "x"
-						+ deviceDisplay.getFullHeight());
-				synchronized (statusBarListener) {
-					if (timer == null) {
-						timer = new Timer();
-					}
-					timer.schedule(new CountTimerTask(count) {
-						public void run() {
-							if (counter == count) {
-								Config.setDeviceEntryDisplaySize(deviceEntry, new Rectangle(0, 0, devicePanel
-										.getWidth(), devicePanel.getHeight()));
-								statusBarListener.statusBarChanged("");
-								timer.cancel();
-								timer = null;
-							}
-						}
-					}, 2000);
-				}
 			}
 		}
 	};
@@ -667,6 +576,11 @@ public class Main extends JFrame {
 		menuButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 16, 4, 16));
 		menuButton.setAlignmentY(JButton.CENTER_ALIGNMENT);
 		bottomPanel.add(menuButton);
+		JButton runButton = new JButton("Run");
+		runButton.setFocusPainted(false);
+		runButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 16, 4, 16));
+		runButton.setAlignmentY(JButton.CENTER_ALIGNMENT);
+		bottomPanel.add(runButton);
 
 		// Add horizontal glue to push future items to the right
 		bottomPanel.add(Box.createHorizontalGlue());
@@ -674,10 +588,7 @@ public class Main extends JFrame {
 		mainContainer.add(bottomPanel, BorderLayout.SOUTH);
 		setContentPane(mainContainer);
 
-		// Status bar (optional, can be merged with toolbar)
-		statusBar.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
-		// Note: Status bar is now part of the main container layout
-
+		// No status bar or other remnants
 		Message.addListener(new SwingErrorMessageDialogPanel(this));
 		devicePanel.setTransferHandler(new DropTransferHandler());
 	}
@@ -846,9 +757,6 @@ public class Main extends JFrame {
 			}
 		});
 
-		if (Config.isWindowOnStart("logConsole")) {
-			app.menuLogConsoleListener.actionPerformed(null);
-		}
 		if (Config.isWindowOnStart("recordStoreManager")) {
 			app.menuRecordStoreManagerListener.actionPerformed(null);
 		}
@@ -861,7 +769,8 @@ public class Main extends JFrame {
 		}
 		app.common.initMIDlet(true);
 
-		app.addComponentListener(app.componentListener);
+		// All timer/status/component remnants removed for minimal clean app
+		app.notifyDestroyedCallback();
 
 		app.responseInterfaceListener.stateChanged(true);
 	}
@@ -876,38 +785,8 @@ public class Main extends JFrame {
 
 	}
 
-    private boolean upTimerRunning = false;
-    public void startUpTimerIfNotRunning() {
-        if (upTimerRunning) return;
-        upTimerStartMillis = System.currentTimeMillis();
-        if (upTimer == null) {
-            upTimer = new javax.swing.Timer(1000, e -> {
-                long elapsed = System.currentTimeMillis() - upTimerStartMillis;
-                long days = elapsed / (1000 * 60 * 60 * 24);
-                long hours = (elapsed / (1000 * 60 * 60)) % 24;
-                long minutes = (elapsed / (1000 * 60)) % 60;
-                long seconds = (elapsed / 1000) % 60;
-                if (upTimerLabel != null) {
-                    upTimerLabel.setText(days + "d" + hours + "h" + minutes + "m" + seconds + "s");
-                }
-            });
-            upTimer.setInitialDelay(0);
-        }
-        upTimer.start();
-        upTimerRunning = true;
-        if (upTimerLabel != null) upTimerLabel.setVisible(true);
-    }
-
-    public void stopUpTimer() {
-        if (upTimer != null) {
-            upTimer.stop();
-        }
-        upTimerRunning = false;
-        if (upTimerLabel != null) {
-            upTimerLabel.setText("0d0h0m0s");
-            upTimerLabel.setVisible(true);
-        }
-    }
+    // All timer/status/component remnants removed for minimal clean app
+    public void stopUpTimer() {}
 
     private File getDefaultPicturesDirectory() {
         String userHome = System.getProperty("user.home");
@@ -934,9 +813,8 @@ public class Main extends JFrame {
         return picturesDir;
     }
 
-    public void notifyDestroyedCallback() {
-        stopUpTimer();
-    }
+    // All timer/status/component remnants removed for minimal clean app
+    public void notifyDestroyedCallback() {}
 }
 
 // Advanced Proxy Settings Dialog
