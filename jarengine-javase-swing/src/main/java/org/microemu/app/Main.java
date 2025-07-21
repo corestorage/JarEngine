@@ -148,6 +148,7 @@ import javax.swing.JScrollPane;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.event.MouseAdapter;
+import javax.swing.JMenuBar;
 
 public class Main extends JFrame {
 
@@ -182,6 +183,7 @@ public class Main extends JFrame {
 	private ResizeDeviceDisplayDialog resizeDeviceDisplayDialog = null;
 
 	private JLabel upTimerLabel = new JLabel("00:00:00");
+	private JToolBar toolbar;
 	private long upTimerStartMillis = -1;
 	private javax.swing.Timer upTimer;
 
@@ -624,6 +626,7 @@ public class Main extends JFrame {
 	};
 
 	public Main() {
+        this.common = new Common(emulatorContext);
 		this.logQueueAppender = new QueueAppender(1024);
 		Logger.addAppender(logQueueAppender);
 
@@ -644,221 +647,31 @@ public class Main extends JFrame {
 
 		Config.loadConfig(new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false), emulatorContext);
 		Logger.setLocationEnabled(Config.isLogConsoleLocationEnabled());
-		Rectangle window = Config.getWindow("main", new Rectangle(0, 0, 160, 120));
+		Rectangle window = Config.getWindow("main", new Rectangle(0, 0, 300, 300));
 		this.setLocation(window.x, window.y);
+		this.setSize(300, 300);
 
-		// --- LXDE-style Bottom Panel with Collapsible In-Panel Menu ---
-		JToolBar toolbar = new JToolBar();
-		toolbar.setFloatable(false);
-		toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.X_AXIS));
-		toolbar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+		// Minimal layout with LXDE-style bottom panel
+		Component deviceComponent = createContents(null);
+		JPanel mainContainer = new JPanel(new BorderLayout());
+		mainContainer.add(deviceComponent, BorderLayout.CENTER);
 
-		JButton btnMenu = new JButton("☰ Menu");
-		btnMenu.setToolTipText("Open main menu");
+		// LXDE-style bottom panel
+		JPanel bottomPanel = new JPanel();
+		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
+		bottomPanel.setBackground(new java.awt.Color(230, 230, 230));
+		bottomPanel.setBorder(javax.swing.BorderFactory.createMatteBorder(1, 0, 0, 0, new java.awt.Color(180, 180, 180)));
 
-		// Main container with vertical layout
-		JPanel mainContainer = new JPanel();
-		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
+		JButton menuButton = new JButton("☰ Menu");
+		menuButton.setFocusPainted(false);
+		menuButton.setBorder(javax.swing.BorderFactory.createEmptyBorder(4, 16, 4, 16));
+		menuButton.setAlignmentY(JButton.CENTER_ALIGNMENT);
+		bottomPanel.add(menuButton);
 
-		// Emulator/game area (create first so devicePanel is available)
-		Component deviceComponent = createContents(mainContainer);
+		// Add horizontal glue to push future items to the right
+		bottomPanel.add(Box.createHorizontalGlue());
 
-		// Collapsible menu panel (hidden by default) - create after devicePanel
-		JPanel menuPanel = new JPanel();
-		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-		menuPanel.setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createMatteBorder(1, 0, 1, 0, toolbar.getBackground().darker()),
-			BorderFactory.createEmptyBorder(12, 16, 12, 16)));
-		menuPanel.setBackground(toolbar.getBackground().brighter());
-		menuPanel.setVisible(false);
-
-		// Preferences section
-		JLabel prefLabel = new JLabel("Preferences");
-		prefLabel.setFont(prefLabel.getFont().deriveFont(Font.BOLD));
-		menuPanel.add(prefLabel);
-		menuPanel.add(Box.createVerticalStrut(8));
-		// Theme
-		JPanel themePanel = new JPanel();
-		themePanel.setLayout(new BoxLayout(themePanel, BoxLayout.X_AXIS));
-		themePanel.setOpaque(false);
-		themePanel.add(new JLabel("Theme: "));
-		ButtonGroup themeGroup = new ButtonGroup();
-		JRadioButtonMenuItem themeLight = new JRadioButtonMenuItem("Light");
-		JRadioButtonMenuItem themeDark = new JRadioButtonMenuItem("Dark");
-		themeGroup.add(themeLight);
-		themeGroup.add(themeDark);
-		themeLight.setSelected(true);
-		themePanel.add(themeLight);
-		themePanel.add(themeDark);
-		themeLight.addActionListener(e -> {
-			try {
-				UIManager.setLookAndFeel(new FlatLightLaf());
-				SwingUtilities.updateComponentTreeUI(this);
-			} catch (Exception ex) {
-				Logger.error(ex);
-			}
-		});
-		themeDark.addActionListener(e -> {
-			try {
-				UIManager.setLookAndFeel(new FlatDarkLaf());
-				SwingUtilities.updateComponentTreeUI(this);
-			} catch (Exception ex) {
-				Logger.error(ex);
-			}
-		});
-		menuPanel.add(themePanel);
-		menuPanel.add(Box.createVerticalStrut(8));
-		// Resize
-		JButton btnResizeMenu = new JButton("Resize");
-		btnResizeMenu.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				if (resizeDeviceDisplayDialog == null) {
-					resizeDeviceDisplayDialog = new ResizeDeviceDisplayDialog();
-				}
-				DeviceDisplayImpl deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();
-				resizeDeviceDisplayDialog.setDeviceDisplaySize(deviceDisplay.getFullWidth(), deviceDisplay.getFullHeight());
-				if (SwingDialogWindow.show(Main.this, "Enter new size...", resizeDeviceDisplayDialog, true)) {
-					int w = resizeDeviceDisplayDialog.getDeviceDisplayWidth();
-					int h = resizeDeviceDisplayDialog.getDeviceDisplayHeight();
-					if (w > 0 && h > 0) {
-						setDeviceSize(deviceDisplay, w, h);
-						pack();
-						devicePanel.requestFocus();
-					} else {
-						JOptionPane.showMessageDialog(Main.this, "Invalid size entered.", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			}
-		});
-		menuPanel.add(btnResizeMenu);
-		menuPanel.add(Box.createVerticalStrut(16));
-
-		// Tools section
-		JLabel toolsLabel = new JLabel("Tools");
-		toolsLabel.setFont(toolsLabel.getFont().deriveFont(Font.BOLD));
-		menuPanel.add(toolsLabel);
-		menuPanel.add(Box.createVerticalStrut(8));
-		// Record
-		JButton btnRecordMenu = new JButton("Record");
-		btnRecordMenu.addActionListener(e -> {
-			if (encoder == null) menuStartCaptureListener.actionPerformed(e);
-			else menuStopCaptureListener.actionPerformed(e);
-		});
-		menuPanel.add(btnRecordMenu);
-		menuPanel.add(Box.createVerticalStrut(4));
-		// Screenshot
-		JButton btnScreenshotMenu = new JButton("Screenshot");
-		btnScreenshotMenu.addActionListener(e -> {
-			try {
-				File picturesDir = getDefaultPicturesDirectory();
-				String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-				File file = new File(picturesDir, "Screenshot_" + timestamp + ".png");
-				java.awt.image.BufferedImage img = ((SwingDisplayComponent) devicePanel.getDisplayComponent()).getGraphicsSurface().getImage();
-				javax.imageio.ImageIO.write(img, "png", file);
-				javax.swing.JOptionPane.showMessageDialog(Main.this, "Screenshot saved to: " + file.getAbsolutePath(), "Screenshot Saved", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-			} catch (Exception ex) {
-				javax.swing.JOptionPane.showMessageDialog(Main.this, "Failed to save screenshot: " + ex.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-			}
-		});
-		menuPanel.add(btnScreenshotMenu);
-		menuPanel.add(Box.createVerticalStrut(4));
-		// Performance submenu (collapsible)
-		JButton btnPerf = new JButton("Performance");
-		JPanel perfPanel = new JPanel();
-		perfPanel.setLayout(new BoxLayout(perfPanel, BoxLayout.Y_AXIS));
-		perfPanel.setOpaque(false);
-		perfPanel.setVisible(false);
-		JCheckBoxMenuItem perfDoubleBuffering = new JCheckBoxMenuItem("Double Buffering");
-		perfDoubleBuffering.setSelected(devicePanel.isDoubleBuffered());
-		perfDoubleBuffering.addActionListener(e -> devicePanel.setDoubleBuffered(perfDoubleBuffering.isSelected()));
-		perfPanel.add(perfDoubleBuffering);
-		JCheckBoxMenuItem perfMinimizeRepaints = new JCheckBoxMenuItem("Minimize Repaints");
-		perfMinimizeRepaints.setSelected(SwingDeviceComponent.isMinimizeRepaints());
-		perfMinimizeRepaints.addActionListener(e -> SwingDeviceComponent.setMinimizeRepaints(perfMinimizeRepaints.isSelected()));
-		perfPanel.add(perfMinimizeRepaints);
-		JCheckBoxMenuItem perfImageCaching = new JCheckBoxMenuItem("Image Caching");
-		perfImageCaching.setSelected(SwingDeviceComponent.isImageCaching());
-		perfImageCaching.addActionListener(e -> SwingDeviceComponent.setImageCaching(perfImageCaching.isSelected()));
-		perfPanel.add(perfImageCaching);
-		JCheckBoxMenuItem perfThreadPriority = new JCheckBoxMenuItem("High Thread Priority");
-		perfThreadPriority.setSelected(MIDletThread.isHighPriority());
-		perfThreadPriority.addActionListener(e -> MIDletThread.setHighPriority(perfThreadPriority.isSelected()));
-		perfPanel.add(perfThreadPriority);
-		JCheckBoxMenuItem perfObjectPooling = new JCheckBoxMenuItem("Object Pooling");
-		perfObjectPooling.setSelected(SwingDeviceComponent.isObjectPooling());
-		perfObjectPooling.addActionListener(e -> SwingDeviceComponent.setObjectPooling(perfObjectPooling.isSelected()));
-		perfPanel.add(perfObjectPooling);
-		btnPerf.addActionListener(e -> perfPanel.setVisible(!perfPanel.isVisible()));
-		menuPanel.add(btnPerf);
-		menuPanel.add(perfPanel);
-		menuPanel.add(Box.createVerticalStrut(4));
-		// Timer
-		JCheckBoxMenuItem timerToggle = new JCheckBoxMenuItem("Show Timer", true);
-		timerToggle.addActionListener(e -> upTimerLabel.setVisible(timerToggle.isSelected()));
-		menuPanel.add(timerToggle);
-		menuPanel.add(Box.createVerticalStrut(4));
-		// Persist
-		JCheckBoxMenuItem persistToggle = new JCheckBoxMenuItem("Persist");
-		persistToggle.addActionListener(e -> PersistMode.enabled = persistToggle.isSelected());
-		menuPanel.add(persistToggle);
-		menuPanel.add(Box.createVerticalStrut(4));
-		// Proxy
-		JButton btnProxy = new JButton("Proxy");
-		btnProxy.addActionListener(e -> {
-			ProxySettingsDialog dialog = new ProxySettingsDialog(this);
-			dialog.setVisible(true);
-		});
-		menuPanel.add(btnProxy);
-		menuPanel.add(Box.createVerticalStrut(8));
-		// About and Exit
-		JButton btnAbout = new JButton("About");
-		btnAbout.addActionListener(menuAboutListener);
-		menuPanel.add(btnAbout);
-		JButton btnExitMenu = new JButton("Exit");
-		btnExitMenu.addActionListener(menuExitListener);
-		menuPanel.add(btnExitMenu);
-
-		// Add components in order: menuPanel, deviceComponent, toolbar
-		mainContainer.add(menuPanel);
-		mainContainer.add(deviceComponent);
-
-		this.common = new Common(emulatorContext);
-		this.common.setStatusBarListener(statusBarListener);
-		this.common.setResponseInterfaceListener(responseInterfaceListener);
-		this.common.loadImplementationsFromConfig();
-
-		// Menu button toggles menuPanel
-		btnMenu.addActionListener(e -> {
-			menuPanel.setVisible(!menuPanel.isVisible());
-			mainContainer.revalidate();
-			mainContainer.repaint();
-		});
-		toolbar.add(btnMenu, 0);
-		toolbar.addSeparator();
-		// Quick-access buttons (right side)
-		JButton btnLog = new JButton("Log");
-		btnLog.setToolTipText("Show Log Console");
-		btnLog.addActionListener(menuLogConsoleListener);
-		toolbar.add(btnLog);
-		JButton btnRecordStore = new JButton("Record Store");
-		btnRecordStore.setToolTipText("Show Record Store Manager");
-		btnRecordStore.addActionListener(menuRecordStoreManagerListener);
-		toolbar.add(btnRecordStore);
-		JButton btnHelp = new JButton("Help");
-		btnHelp.setToolTipText("About");
-		btnHelp.addActionListener(menuAboutListener);
-		toolbar.add(btnHelp);
-		JButton btnExit = new JButton("Exit");
-		btnExit.setToolTipText("Exit Emulator");
-		btnExit.addActionListener(menuExitListener);
-		toolbar.add(btnExit);
-		toolbar.add(Box.createHorizontalGlue());
-		toolbar.add(upTimerLabel);
-
-		// Add toolbar to the main container (at the very bottom)
-		mainContainer.add(toolbar);
-
-		// Set the main container as the content pane
+		mainContainer.add(bottomPanel, BorderLayout.SOUTH);
 		setContentPane(mainContainer);
 
 		// Status bar (optional, can be merged with toolbar)
@@ -929,9 +742,12 @@ public class Main extends JFrame {
 	}
 	
 	protected void setDeviceSize(DeviceDisplayImpl deviceDisplay, int width, int height) {
-	    // move the soft buttons
-	    int menuh = 0;
-	    Enumeration en = DeviceFactory.getDevice().getSoftButtons().elements();
+        if (devicePanel == null || deviceDisplay == null) {
+            return;
+        }
+        // move the soft buttons
+        int menuh = 0;
+        Enumeration en = DeviceFactory.getDevice().getSoftButtons().elements();
         while (en.hasMoreElements()) {
             SoftButton button = (SoftButton) en.nextElement();
             Rectangle paintable = button.getPaintable();
@@ -952,6 +768,9 @@ public class Main extends JFrame {
             da.sizeChanged();
             deviceDisplay.repaint(0, 0, deviceDisplay.getFullWidth(), deviceDisplay.getFullHeight());
         }
+        // After resizing, pack the window and focus device panel
+        pack();
+        devicePanel.requestFocus();
 	}
 
 	protected void updateDevice() {
@@ -989,6 +808,7 @@ public class Main extends JFrame {
 		}
 
 		final Main app = new Main();
+		// Ensure devicePanel is initialized before device setup
 		SwingUtilities.updateComponentTreeUI(app);
 		if (args.length > 0) {
 			Logger.debug("arguments", debugArgs.toString());
@@ -997,18 +817,34 @@ public class Main extends JFrame {
 		// Only use resizable device
 		if (app.common.initParams(params, new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false), J2SEDevice.class)) {
 			app.deviceEntry = new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false);
-			DeviceDisplayImpl deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();
-			if (deviceDisplay.isResizable()) {
-				Rectangle size = Config.getDeviceEntryDisplaySize(app.deviceEntry);
-				if (size != null) {
-					app.setDeviceSize(deviceDisplay, size.width, size.height);
-				}
-			}
 		}
 		app.updateDevice();
-
 		app.validate();
 		app.setVisible(true);
+		// Set initial size after window and device are ready
+		SwingUtilities.invokeLater(() -> {
+			if (app.deviceEntry == null) {
+				app.deviceEntry = new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false);
+			}
+			DeviceDisplayImpl deviceDisplay = null;
+			try {
+				deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();
+			} catch (Exception ex) {
+				deviceDisplay = null;
+			}
+			if (deviceDisplay != null && deviceDisplay.isResizable()) {
+				Rectangle size = null;
+				try {
+					size = Config.getDeviceEntryDisplaySize(app.deviceEntry);
+				} catch (Exception ex) {
+					size = null;
+				}
+				if (size == null) {
+					size = new Rectangle(0, 0, 300, 300);
+				}
+				app.setDeviceSize(deviceDisplay, size.width, size.height);
+			}
+		});
 
 		if (Config.isWindowOnStart("logConsole")) {
 			app.menuLogConsoleListener.actionPerformed(null);

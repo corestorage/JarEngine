@@ -204,9 +204,13 @@ public class J2SESoftButton extends J2SEButton implements SoftButton {
 			}
 		} else if (type == TYPE_ICON) {
 			if (pressed) {
-				g.drawImage(((J2SEImmutableImage) pressedImage).getImage(), paintable.x, paintable.y, null);
+				if (pressedImage != null && pressedImage instanceof J2SEImmutableImage) {
+					g.drawImage(((J2SEImmutableImage) pressedImage).getImage(), paintable.x, paintable.y, null);
+				} // else: skip drawing, or optionally log a warning
 			} else {
-				g.drawImage(((J2SEImmutableImage) normalImage).getImage(), paintable.x, paintable.y, null);
+				if (normalImage != null && normalImage instanceof J2SEImmutableImage) {
+					g.drawImage(((J2SEImmutableImage) normalImage).getImage(), paintable.x, paintable.y, null);
+				} // else: skip drawing, or optionally log a warning
 			}
 		}
 
