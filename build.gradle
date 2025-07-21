@@ -22,13 +22,13 @@ subprojects {
     }
 }
 
-task copyFatJar(type: Copy) {
+task deliverEndUserJar(type: Copy) {
     dependsOn ':jarengine-javase-swing:shadowJar'
     from('jarengine-javase-swing/build/libs/JarEngine-1.0.0-all.jar')
     into('build/libs')
     rename { String fileName ->
-        fileName.replace('-all', '')
+        'JarEngine-1.0.0.jar'
     }
 }
 
-build.finalizedBy(copyFatJar) 
+build.finalizedBy(deliverEndUserJar) 
