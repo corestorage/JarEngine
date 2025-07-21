@@ -8,4 +8,4 @@ public interface HttpsConnection extends HttpConnection {
 	
 	public int getPort();
 
-}
+} 

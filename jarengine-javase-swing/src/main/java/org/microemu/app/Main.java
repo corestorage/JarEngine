@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -65,13 +66,9 @@ import java.util.TimerTask;
 import javax.microedition.midlet.MIDletStateChangeException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
@@ -83,8 +80,6 @@ import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
-import javax.swing.ButtonGroup;
-import javax.swing.JRadioButtonMenuItem;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -102,7 +97,6 @@ import org.microemu.app.ui.ResponseInterfaceListener;
 import org.microemu.app.ui.StatusBarListener;
 import org.microemu.app.ui.swing.DropTransferHandler;
 import org.microemu.app.ui.swing.ExtensionFileFilter;
-import org.microemu.app.ui.swing.JMRUMenu;
 import org.microemu.app.ui.swing.MIDletUrlPanel;
 import org.microemu.app.ui.swing.RecordStoreManagerDialog;
 import org.microemu.app.ui.swing.ResizeDeviceDisplayDialog;
@@ -138,10 +132,22 @@ import org.microemu.log.QueueAppender;
 import org.microemu.util.JadMidletEntry;
 import org.microemu.app.update.UpdateChecker;
 import javax.swing.SwingWorker;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import javax.swing.plaf.metal.OceanTheme;
+import javax.swing.JToolBar;
+import javax.swing.JToggleButton;
+import javax.swing.JPopupMenu;
+import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JMenu;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
+import javax.swing.JSplitPane;
+import javax.swing.JScrollPane;
+
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import java.awt.event.MouseAdapter;
 
 public class Main extends JFrame {
 
@@ -157,25 +163,7 @@ public class Main extends JFrame {
 
 	private JFileChooser captureFileChooser = null;
 
-	private JMenuItem menuOpenMIDletFile;
-
-	private JMenuItem menuOpenMIDletURL;
-
-	private JMenuItem menuSaveForWeb;
-
-	private JMenuItem menuStartCapture;
-
-	private JMenuItem menuStopCapture;
-
-	private JCheckBoxMenuItem menuMIDletNetworkConnection;
-
-	private JCheckBoxMenuItem menuLogConsole;
-
-	private JCheckBoxMenuItem menuRecordStoreManager;
-
 	private JFrame scaledDisplayFrame;
-
-	private JCheckBoxMenuItem[] zoomLevels;
 
 	private SwingDeviceComponent devicePanel;
 
@@ -191,15 +179,11 @@ public class Main extends JFrame {
 
 	private JLabel statusBar = new JLabel("Status");
 
-	private JButton resizeButton = new JButton("Resize");
-
 	private ResizeDeviceDisplayDialog resizeDeviceDisplayDialog = null;
 
 	private JLabel upTimerLabel = new JLabel("00:00:00");
 	private long upTimerStartMillis = -1;
 	private javax.swing.Timer upTimer;
-
-	private JCheckBoxMenuItem menuTimerToggle;
 
 	private File captureFile;
 
@@ -414,8 +398,7 @@ public class Main extends JFrame {
 			Main.this.captureFile = new File(picturesDir, "Recording_" + timestamp + ".gif");
 			encoder = new AnimatedGifEncoder();
 			encoder.start(Main.this.captureFile.getAbsolutePath());
-			menuStartCapture.setEnabled(false);
-			menuStopCapture.setEnabled(true);
+			// Remove menu field references - these will be handled by toolbar buttons
 			((SwingDisplayComponent) emulatorContext.getDisplayComponent())
 				.addDisplayRepaintListener(new DisplayRepaintListener() {
 					long start = 0;
@@ -452,21 +435,24 @@ public class Main extends JFrame {
 
 	private ActionListener menuStopCaptureListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			menuStopCapture.setEnabled(false);
+			// Remove menu field references - these will be handled by toolbar buttons
 
 			synchronized (Main.this) {
-				encoder.finish();
-				javax.swing.JOptionPane.showMessageDialog(Main.this, "Recording saved to: " + (Main.this.captureFile != null ? Main.this.captureFile.getAbsolutePath() : "(unknown location)"), "Recording Saved", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-				encoder = null;
+				if (encoder != null) {
+					encoder.finish();
+					javax.swing.JOptionPane.showMessageDialog(Main.this, "Recording saved to: " + (Main.this.captureFile != null ? Main.this.captureFile.getAbsolutePath() : "(unknown location)"), "Recording Saved", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+					encoder = null;
+				}
 			}
 
-			menuStartCapture.setEnabled(true);
+			// Remove menu field references - these will be handled by toolbar buttons
 		}
 	};
 
 	private ActionListener menuMIDletNetworkConnectionListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			org.microemu.cldc.http.Connection.setAllowNetworkConnection(menuMIDletNetworkConnection.getState());
+			// This will be handled by a toolbar button or settings dialog
+			org.microemu.cldc.http.Connection.setAllowNetworkConnection(true);
 		}
 
 	};
@@ -477,7 +463,7 @@ public class Main extends JFrame {
 				recordStoreManagerDialog = new RecordStoreManagerDialog(Main.this, common);
 				recordStoreManagerDialog.addWindowListener(new WindowAdapter() {
 					public void windowClosing(WindowEvent e) {
-						menuRecordStoreManager.setState(false);
+						// Remove menu field reference - this will be handled by toolbar button
 					}
 				});
 				recordStoreManagerDialog.pack();
@@ -494,7 +480,7 @@ public class Main extends JFrame {
 				logConsoleDialog = new SwingLogConsoleDialog(Main.this, Main.this.logQueueAppender);
 				logConsoleDialog.addWindowListener(new WindowAdapter() {
 					public void windowClosing(WindowEvent e) {
-						menuLogConsole.setState(false);
+						// Remove menu field reference - this will be handled by toolbar button
 					}
 				});
 				logConsoleDialog.pack();
@@ -547,125 +533,9 @@ public class Main extends JFrame {
 		private DisplayRepaintListener updateScaledImageListener;
 
 		public void actionPerformed(ActionEvent e) {
-			final JCheckBoxMenuItem selectedZoomLevelMenuItem = (JCheckBoxMenuItem) e.getSource();
-			if (selectedZoomLevelMenuItem.isSelected()) {
-				for (int i = 0; i < zoomLevels.length; ++i) {
-					if (zoomLevels[i] != e.getSource()) {
-						zoomLevels[i].setSelected(false);
-					}
-				}
-				final int scale = Integer.parseInt(e.getActionCommand());
-				if (scaledDisplayFrame != null) {
-					((SwingDisplayComponent) emulatorContext.getDisplayComponent())
-							.removeDisplayRepaintListener(updateScaledImageListener);
-					scaledDisplayFrame.dispose();
-				}
-				scaledDisplayFrame = new JFrame(getTitle());
-				scaledDisplayFrame.setContentPane(new JLabel(new ImageIcon()));
-				updateScaledImageListener = new DisplayRepaintListener() {
-					public void repaintInvoked(Object repaintObject) {
-						updateScaledImage(scale, scaledDisplayFrame);
-						scaledDisplayFrame.validate();
-					}
-				};
-				scaledDisplayFrame.addWindowListener(new WindowAdapter() {
-					public void windowClosing(WindowEvent event) {
-						selectedZoomLevelMenuItem.setSelected(false);
-					}
-				});
-				scaledDisplayFrame.getContentPane().addMouseListener(new MouseListener() {
-					private MouseListener receiver = ((SwingDisplayComponent) emulatorContext.getDisplayComponent())
-							.getMouseListener();
-
-					public void mouseClicked(MouseEvent e) {
-						receiver.mouseClicked(createAdaptedMouseEvent(e, scale));
-					}
-
-					public void mousePressed(MouseEvent e) {
-						receiver.mousePressed(createAdaptedMouseEvent(e, scale));
-					}
-
-					public void mouseReleased(MouseEvent e) {
-						receiver.mouseReleased(createAdaptedMouseEvent(e, scale));
-					}
-
-					public void mouseEntered(MouseEvent e) {
-						receiver.mouseEntered(createAdaptedMouseEvent(e, scale));
-					}
-
-					public void mouseExited(MouseEvent e) {
-						receiver.mouseExited(createAdaptedMouseEvent(e, scale));
-					}
-				});
-				scaledDisplayFrame.getContentPane().addMouseMotionListener(new MouseMotionListener() {
-					private MouseMotionListener receiver = ((SwingDisplayComponent) emulatorContext
-							.getDisplayComponent()).getMouseMotionListener();
-
-					public void mouseDragged(MouseEvent e) {
-						receiver.mouseDragged(createAdaptedMouseEvent(e, scale));
-					}
-
-					public void mouseMoved(MouseEvent e) {
-						receiver.mouseMoved(createAdaptedMouseEvent(e, scale));
-					}
-				});
-				scaledDisplayFrame.getContentPane().addMouseWheelListener(new MouseWheelListener() {
-					private MouseWheelListener receiver = ((SwingDisplayComponent) emulatorContext
-							.getDisplayComponent()).getMouseWheelListener();
-
-					public void mouseWheelMoved(MouseWheelEvent e) {
-						MouseWheelEvent adaptedEvent = createAdaptedMouseWheelEvent(e, scale);
-						receiver.mouseWheelMoved(adaptedEvent);
-					}
-				});
-				scaledDisplayFrame.addKeyListener(devicePanel);
-
-				updateScaledImage(scale, scaledDisplayFrame);
-				((SwingDisplayComponent) emulatorContext.getDisplayComponent())
-						.addDisplayRepaintListener(updateScaledImageListener);
-				scaledDisplayFrame.setIconImage(getIconImage());
-				scaledDisplayFrame.setResizable(false);
-				Point location = getLocation();
-				Dimension size = getSize();
-				Rectangle window = Config.getWindow("scaledDisplay", new Rectangle(location.x + size.width, location.y,
-						0, 0));
-				scaledDisplayFrame.setLocation(window.x, window.y);
-				Config.setWindow("scaledDisplay", new Rectangle(scaledDisplayFrame.getX(), scaledDisplayFrame.getY(),
-						0, 0), false);
-				scaledDisplayFrame.pack();
-				scaledDisplayFrame.setVisible(true);
-			} else {
-				((SwingDisplayComponent) emulatorContext.getDisplayComponent())
-						.removeDisplayRepaintListener(updateScaledImageListener);
-				scaledDisplayFrame.dispose();
-			}
-		}
-
-		private MouseEvent createAdaptedMouseEvent(MouseEvent e, int scale) {
-			return new MouseEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(), e.getX() / scale, e
-					.getY()
-					/ scale, e.getClickCount(), e.isPopupTrigger(), e.getButton());
-		}
-
-		private MouseWheelEvent createAdaptedMouseWheelEvent(MouseWheelEvent e, int scale) {
-			return new MouseWheelEvent(e.getComponent(), e.getID(), e.getWhen(), e.getModifiers(), e.getX() / scale, e
-					.getY()
-					/ scale, e.getClickCount(), e.isPopupTrigger(), e.getScrollType(), e.getScrollAmount(), e
-					.getWheelRotation());
-		}
-
-		private void updateScaledImage(int scale, JFrame scaledLCDFrame) {
-			J2SEGraphicsSurface graphicsSurface = 
-					((SwingDisplayComponent) emulatorContext.getDisplayComponent()).getGraphicsSurface();
-			
-			BufferedImage img = graphicsSurface.getImage();
-			BufferedImage scaledImg = new BufferedImage(img.getWidth() * scale, img.getHeight() * scale, img.getType());
-			Graphics2D imgGraphics = scaledImg.createGraphics();
-			imgGraphics.scale(scale, scale);
-			imgGraphics.drawImage(img, 0, 0, null);
-			
-			((ImageIcon) (((JLabel) scaledLCDFrame.getContentPane()).getIcon())).setImage(scaledImg);
-			((JLabel) scaledLCDFrame.getContentPane()).repaint();
+			// Remove zoomLevels references - this functionality can be added to toolbar later
+			// For now, just show a message that this feature is not yet implemented in the new UI
+			JOptionPane.showMessageDialog(Main.this, "Scaled display feature will be available in the toolbar soon.", "Feature Not Available", JOptionPane.INFORMATION_MESSAGE);
 		}
 	};
 
@@ -679,14 +549,7 @@ public class Main extends JFrame {
 
 	private ResponseInterfaceListener responseInterfaceListener = new ResponseInterfaceListener() {
 		public void stateChanged(boolean state) {
-			menuOpenMIDletFile.setEnabled(state);
-			menuOpenMIDletURL.setEnabled(state);
-			
-			if (common.jad.getJarURL() != null) {
-				menuSaveForWeb.setEnabled(state);
-			} else {
-				menuSaveForWeb.setEnabled(false);
-			}
+			// Remove menu field references - these will be handled by toolbar buttons
 			
 			// Update window title when MIDlet is loaded/unloaded
 			if (state) {
@@ -761,89 +624,72 @@ public class Main extends JFrame {
 	};
 
 	public Main() {
-		this(null);
-		// Register destroyed and started callbacks with Common
-		if (common != null) {
-			common.setDestroyedCallback(this::notifyDestroyedCallback);
-			common.setStartedCallback(this::startUpTimerIfNotRunning);
-		}
-	}
-
-	public Main(DeviceEntry defaultDevice) {
-
 		this.logQueueAppender = new QueueAppender(1024);
 		Logger.addAppender(logQueueAppender);
 
-		JMenuBar menuBar = new JMenuBar();
+		// Set window properties
+		setTitle("JarEngine");
+		this.setIconImage(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/org/microemu/icon.png")));
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setResizable(true);
+		setLocationRelativeTo(null);
+		addWindowListener(windowListener);
+		addWindowFocusListener(new java.awt.event.WindowAdapter() {
+            public void windowGainedFocus(java.awt.event.WindowEvent e) {
+                if (devicePanel != null) {
+                    devicePanel.requestFocusInWindow();
+                }
+            }
+        });
 
-		JMenu menuFile = new JMenu("File");
+		Config.loadConfig(new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false), emulatorContext);
+		Logger.setLocationEnabled(Config.isLogConsoleLocationEnabled());
+		Rectangle window = Config.getWindow("main", new Rectangle(0, 0, 160, 120));
+		this.setLocation(window.x, window.y);
 
-		menuOpenMIDletFile = new JMenuItem("Open MIDlet File...");
-		menuOpenMIDletFile.addActionListener(menuOpenMIDletFileListener);
-		menuFile.add(menuOpenMIDletFile);
+		// --- LXDE-style Bottom Panel with Collapsible In-Panel Menu ---
+		JToolBar toolbar = new JToolBar();
+		toolbar.setFloatable(false);
+		toolbar.setLayout(new BoxLayout(toolbar, BoxLayout.X_AXIS));
+		toolbar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-		menuOpenMIDletURL = new JMenuItem("Open MIDlet URL...");
-		menuOpenMIDletURL.addActionListener(menuOpenMIDletURLListener);
-		menuFile.add(menuOpenMIDletURL);
+		JButton btnMenu = new JButton("☰ Menu");
+		btnMenu.setToolTipText("Open main menu");
 
-		JMenuItem menuItemTmp = new JMenuItem("Close MIDlet");
-		menuItemTmp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
-		menuItemTmp.addActionListener(menuCloseMidletListener);
-		menuFile.add(menuItemTmp);
+		// Main container with vertical layout
+		JPanel mainContainer = new JPanel();
+		mainContainer.setLayout(new BoxLayout(mainContainer, BoxLayout.Y_AXIS));
 
-		menuFile.addSeparator();
+		// Emulator/game area (create first so devicePanel is available)
+		Component deviceComponent = createContents(mainContainer);
 
-		JMRUMenu urlsMRU = new JMRUMenu("Recent MIDlets...");
-		urlsMRU.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				if (event instanceof JMRUMenu.MRUActionEvent) {
-					Common.openMIDletUrlSafe(((MidletURLReference) ((JMRUMenu.MRUActionEvent) event).getSourceMRU())
-							.getUrl());
-					if (recordStoreManagerDialog != null) {
-						recordStoreManagerDialog.refresh();
-					}
-				}
-			}
-		});
+		// Collapsible menu panel (hidden by default) - create after devicePanel
+		JPanel menuPanel = new JPanel();
+		menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
+		menuPanel.setBorder(BorderFactory.createCompoundBorder(
+			BorderFactory.createMatteBorder(1, 0, 1, 0, toolbar.getBackground().darker()),
+			BorderFactory.createEmptyBorder(12, 16, 12, 16)));
+		menuPanel.setBackground(toolbar.getBackground().brighter());
+		menuPanel.setVisible(false);
 
-		Config.getUrlsMRU().setListener(urlsMRU);
-		menuFile.add(urlsMRU);
-
-		menuFile.addSeparator();
-
-		menuSaveForWeb = new JMenuItem("Save for Web...");
-		menuSaveForWeb.addActionListener(menuSaveForWebListener);
-		menuFile.add(menuSaveForWeb);
-
-		menuFile.addSeparator();
-
-		JMenuItem menuItem = new JMenuItem("Exit");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
-		menuItem.addActionListener(menuExitListener);
-		menuFile.add(menuItem);
-
-		JMenu menuOptions = new JMenu("Options");
-
-		JMenu menuScaleLCD = new JMenu("Scaled display");
-		menuOptions.add(menuScaleLCD);
-		zoomLevels = new JCheckBoxMenuItem[3];
-		for (int i = 0; i < zoomLevels.length; ++i) {
-			zoomLevels[i] = new JCheckBoxMenuItem("x " + (i + 2));
-			zoomLevels[i].setActionCommand("" + (i + 2));
-			zoomLevels[i].addActionListener(menuScaledDisplayListener);
-			menuScaleLCD.add(zoomLevels[i]);
-		}
-
-		// --- Theme Menu ---
-		JMenu menuTheme = new JMenu("Theme");
+		// Preferences section
+		JLabel prefLabel = new JLabel("Preferences");
+		prefLabel.setFont(prefLabel.getFont().deriveFont(Font.BOLD));
+		menuPanel.add(prefLabel);
+		menuPanel.add(Box.createVerticalStrut(8));
+		// Theme
+		JPanel themePanel = new JPanel();
+		themePanel.setLayout(new BoxLayout(themePanel, BoxLayout.X_AXIS));
+		themePanel.setOpaque(false);
+		themePanel.add(new JLabel("Theme: "));
 		ButtonGroup themeGroup = new ButtonGroup();
 		JRadioButtonMenuItem themeLight = new JRadioButtonMenuItem("Light");
 		JRadioButtonMenuItem themeDark = new JRadioButtonMenuItem("Dark");
 		themeGroup.add(themeLight);
 		themeGroup.add(themeDark);
-		menuTheme.add(themeLight);
-		menuTheme.add(themeDark);
 		themeLight.setSelected(true);
+		themePanel.add(themeLight);
+		themePanel.add(themeDark);
 		themeLight.addActionListener(e -> {
 			try {
 				UIManager.setLookAndFeel(new FlatLightLaf());
@@ -860,325 +706,167 @@ public class Main extends JFrame {
 				Logger.error(ex);
 			}
 		});
-		menuOptions.add(menuTheme);
-		// --- End Theme Menu ---
-
-		menuStartCapture = new JMenuItem("Start Recording");
-		menuStartCapture.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        File picturesDir = getDefaultPicturesDirectory();
-		        String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-		        Main.this.captureFile = new File(picturesDir, "Recording_" + timestamp + ".gif");
-		        encoder = new AnimatedGifEncoder();
-		        encoder.start(Main.this.captureFile.getAbsolutePath());
-		        menuStartCapture.setEnabled(false);
-		        menuStopCapture.setEnabled(true);
-		        ((SwingDisplayComponent) emulatorContext.getDisplayComponent())
-		            .addDisplayRepaintListener(new DisplayRepaintListener() {
-		                long start = 0;
-		                public void repaintInvoked(Object repaintObject) {
-		                    synchronized (Main.this) {
-		                        if (encoder != null) {
-		                            if (start == 0) {
-		                                start = System.currentTimeMillis();
-		                            } else {
-		                                long current = System.currentTimeMillis();
-		                                encoder.setDelay((int) (current - start));
-		                                start = current;
-		                            }
-		                            encoder.addFrame(((J2SEGraphicsSurface) repaintObject).getImage());
-		                        }
-		                    }
-		                }
-		            });
-		        javax.swing.JOptionPane.showMessageDialog(Main.this, "Recording started", "Recording Started", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-		    }
-		    private boolean allowOverride(File file) {
-		        if (file.exists()) {
-		            int answer = JOptionPane.showConfirmDialog(Main.this, "Override the file:" + file + "?", "Question?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-		            if (answer == 1 /* no */) {
-		                return false;
-		            }
-		        }
-		        return true;
-		    }
-		});
-		menuStopCapture = new JMenuItem("Stop Recording");
-		menuStopCapture.setEnabled(false);
-		menuStopCapture.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        menuStopCapture.setEnabled(false);
-		        synchronized (Main.this) {
-		            if (encoder != null) {
-		                encoder.finish();
-		                javax.swing.JOptionPane.showMessageDialog(Main.this, "Recording saved to: " + (Main.this.captureFile != null ? Main.this.captureFile.getAbsolutePath() : "(unknown location)"), "Recording Saved", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-		                encoder = null;
-		            }
-		        }
-		        menuStartCapture.setEnabled(true);
-		    }
-		});
-		menuOptions.add(menuStartCapture);
-		menuOptions.add(menuStopCapture);
-
-		menuMIDletNetworkConnection = new JCheckBoxMenuItem("MIDlet Network access");
-		menuMIDletNetworkConnection.setState(true);
-		menuMIDletNetworkConnection.addActionListener(menuMIDletNetworkConnectionListener);
-		menuOptions.add(menuMIDletNetworkConnection);
-
-		menuRecordStoreManager = new JCheckBoxMenuItem("Record Store Manager");
-		menuRecordStoreManager.setState(false);
-		menuRecordStoreManager.addActionListener(menuRecordStoreManagerListener);
-		menuOptions.add(menuRecordStoreManager);
-
-		menuLogConsole = new JCheckBoxMenuItem("Log console");
-		menuLogConsole.setState(false);
-		menuLogConsole.addActionListener(menuLogConsoleListener);
-		menuOptions.add(menuLogConsole);
-
-		menuOptions.addSeparator();
-		JCheckBoxMenuItem menuShowMouseCoordinates = new JCheckBoxMenuItem("Mouse coordinates");
-		menuShowMouseCoordinates.setState(false);
-		menuShowMouseCoordinates.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				devicePanel.switchShowMouseCoordinates();
+		menuPanel.add(themePanel);
+		menuPanel.add(Box.createVerticalStrut(8));
+		// Resize
+		JButton btnResizeMenu = new JButton("Resize");
+		btnResizeMenu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				if (resizeDeviceDisplayDialog == null) {
+					resizeDeviceDisplayDialog = new ResizeDeviceDisplayDialog();
+				}
+				DeviceDisplayImpl deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();
+				resizeDeviceDisplayDialog.setDeviceDisplaySize(deviceDisplay.getFullWidth(), deviceDisplay.getFullHeight());
+				if (SwingDialogWindow.show(Main.this, "Enter new size...", resizeDeviceDisplayDialog, true)) {
+					int w = resizeDeviceDisplayDialog.getDeviceDisplayWidth();
+					int h = resizeDeviceDisplayDialog.getDeviceDisplayHeight();
+					if (w > 0 && h > 0) {
+						setDeviceSize(deviceDisplay, w, h);
+						pack();
+						devicePanel.requestFocus();
+					} else {
+						JOptionPane.showMessageDialog(Main.this, "Invalid size entered.", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
 			}
 		});
-		menuOptions.add(menuShowMouseCoordinates);
+		menuPanel.add(btnResizeMenu);
+		menuPanel.add(Box.createVerticalStrut(16));
 
-		JMenu menuHelp = new JMenu("Help");
-		JMenuItem menuAbout = new JMenuItem("About");
-		menuAbout.addActionListener(menuAboutListener);
-		menuHelp.add(menuAbout);
-
-		JMenu menuTools = new JMenu("Tools");
-		JMenu menuRecordTab = new JMenu("Record Tab");
-		menuRecordTab.add(menuStartCapture);
-		menuRecordTab.add(menuStopCapture);
-		menuTools.add(menuRecordTab);
-		JMenuItem menuScreenshot = new JMenuItem("Screenshot");
-		menuScreenshot.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        try {
-		            File picturesDir = getDefaultPicturesDirectory();
-		            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-		            File file = new File(picturesDir, "Screenshot_" + timestamp + ".png");
-		            java.awt.image.BufferedImage img = ((SwingDisplayComponent) devicePanel.getDisplayComponent()).getGraphicsSurface().getImage();
-		            javax.imageio.ImageIO.write(img, "png", file);
-		            javax.swing.JOptionPane.showMessageDialog(Main.this, "Screenshot saved to: " + file.getAbsolutePath(), "Screenshot Saved", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-		        } catch (Exception ex) {
-		            javax.swing.JOptionPane.showMessageDialog(Main.this, "Failed to save screenshot: " + ex.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-		        }
-		    }
+		// Tools section
+		JLabel toolsLabel = new JLabel("Tools");
+		toolsLabel.setFont(toolsLabel.getFont().deriveFont(Font.BOLD));
+		menuPanel.add(toolsLabel);
+		menuPanel.add(Box.createVerticalStrut(8));
+		// Record
+		JButton btnRecordMenu = new JButton("Record");
+		btnRecordMenu.addActionListener(e -> {
+			if (encoder == null) menuStartCaptureListener.actionPerformed(e);
+			else menuStopCaptureListener.actionPerformed(e);
 		});
-		menuTools.add(menuScreenshot);
-		JMenu menuPerformance = new JMenu("Performance");
+		menuPanel.add(btnRecordMenu);
+		menuPanel.add(Box.createVerticalStrut(4));
+		// Screenshot
+		JButton btnScreenshotMenu = new JButton("Screenshot");
+		btnScreenshotMenu.addActionListener(e -> {
+			try {
+				File picturesDir = getDefaultPicturesDirectory();
+				String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+				File file = new File(picturesDir, "Screenshot_" + timestamp + ".png");
+				java.awt.image.BufferedImage img = ((SwingDisplayComponent) devicePanel.getDisplayComponent()).getGraphicsSurface().getImage();
+				javax.imageio.ImageIO.write(img, "png", file);
+				javax.swing.JOptionPane.showMessageDialog(Main.this, "Screenshot saved to: " + file.getAbsolutePath(), "Screenshot Saved", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+			} catch (Exception ex) {
+				javax.swing.JOptionPane.showMessageDialog(Main.this, "Failed to save screenshot: " + ex.getMessage(), "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+			}
+		});
+		menuPanel.add(btnScreenshotMenu);
+		menuPanel.add(Box.createVerticalStrut(4));
+		// Performance submenu (collapsible)
+		JButton btnPerf = new JButton("Performance");
+		JPanel perfPanel = new JPanel();
+		perfPanel.setLayout(new BoxLayout(perfPanel, BoxLayout.Y_AXIS));
+		perfPanel.setOpaque(false);
+		perfPanel.setVisible(false);
 		JCheckBoxMenuItem perfDoubleBuffering = new JCheckBoxMenuItem("Double Buffering");
+		perfDoubleBuffering.setSelected(devicePanel.isDoubleBuffered());
+		perfDoubleBuffering.addActionListener(e -> devicePanel.setDoubleBuffered(perfDoubleBuffering.isSelected()));
+		perfPanel.add(perfDoubleBuffering);
 		JCheckBoxMenuItem perfMinimizeRepaints = new JCheckBoxMenuItem("Minimize Repaints");
+		perfMinimizeRepaints.setSelected(SwingDeviceComponent.isMinimizeRepaints());
+		perfMinimizeRepaints.addActionListener(e -> SwingDeviceComponent.setMinimizeRepaints(perfMinimizeRepaints.isSelected()));
+		perfPanel.add(perfMinimizeRepaints);
 		JCheckBoxMenuItem perfImageCaching = new JCheckBoxMenuItem("Image Caching");
+		perfImageCaching.setSelected(SwingDeviceComponent.isImageCaching());
+		perfImageCaching.addActionListener(e -> SwingDeviceComponent.setImageCaching(perfImageCaching.isSelected()));
+		perfPanel.add(perfImageCaching);
 		JCheckBoxMenuItem perfThreadPriority = new JCheckBoxMenuItem("High Thread Priority");
+		perfThreadPriority.setSelected(MIDletThread.isHighPriority());
+		perfThreadPriority.addActionListener(e -> MIDletThread.setHighPriority(perfThreadPriority.isSelected()));
+		perfPanel.add(perfThreadPriority);
 		JCheckBoxMenuItem perfObjectPooling = new JCheckBoxMenuItem("Object Pooling");
-		menuPerformance.add(perfDoubleBuffering);
-		menuPerformance.add(perfMinimizeRepaints);
-		menuPerformance.add(perfImageCaching);
-		menuPerformance.add(perfThreadPriority);
-		menuPerformance.add(perfObjectPooling);
-		menuTools.add(menuPerformance);
-		JCheckBoxMenuItem menuPersist = new JCheckBoxMenuItem("Persist");
-		menuTools.add(menuPersist);
-		// Proxy menu item
-		JMenuItem menuProxy = new JMenuItem("Proxy");
-		menuProxy.addActionListener(e -> {
+		perfObjectPooling.setSelected(SwingDeviceComponent.isObjectPooling());
+		perfObjectPooling.addActionListener(e -> SwingDeviceComponent.setObjectPooling(perfObjectPooling.isSelected()));
+		perfPanel.add(perfObjectPooling);
+		btnPerf.addActionListener(e -> perfPanel.setVisible(!perfPanel.isVisible()));
+		menuPanel.add(btnPerf);
+		menuPanel.add(perfPanel);
+		menuPanel.add(Box.createVerticalStrut(4));
+		// Timer
+		JCheckBoxMenuItem timerToggle = new JCheckBoxMenuItem("Show Timer", true);
+		timerToggle.addActionListener(e -> upTimerLabel.setVisible(timerToggle.isSelected()));
+		menuPanel.add(timerToggle);
+		menuPanel.add(Box.createVerticalStrut(4));
+		// Persist
+		JCheckBoxMenuItem persistToggle = new JCheckBoxMenuItem("Persist");
+		persistToggle.addActionListener(e -> PersistMode.enabled = persistToggle.isSelected());
+		menuPanel.add(persistToggle);
+		menuPanel.add(Box.createVerticalStrut(4));
+		// Proxy
+		JButton btnProxy = new JButton("Proxy");
+		btnProxy.addActionListener(e -> {
 			ProxySettingsDialog dialog = new ProxySettingsDialog(this);
 			dialog.setVisible(true);
 		});
-		menuTools.add(menuProxy);
-		menuBar.add(menuFile);
-		menuBar.add(menuOptions);
-		menuBar.add(menuTools);
-		menuBar.add(menuHelp);
-		menuBar.add(Box.createHorizontalGlue()); // Pushes the next component to the right
-		menuBar.add(upTimerLabel);
-		setJMenuBar(menuBar);
+		menuPanel.add(btnProxy);
+		menuPanel.add(Box.createVerticalStrut(8));
+		// About and Exit
+		JButton btnAbout = new JButton("About");
+		btnAbout.addActionListener(menuAboutListener);
+		menuPanel.add(btnAbout);
+		JButton btnExitMenu = new JButton("Exit");
+		btnExitMenu.addActionListener(menuExitListener);
+		menuPanel.add(btnExitMenu);
 
-		// UpTimer is not running at launch
-		upTimerLabel.setText("0d0h0m0s");
-		upTimerLabel.setVisible(true);
-		upTimerRunning = false;
-		if (upTimer != null) upTimer.stop();
-
-		// Change window title to simple format
-		setTitle("JarEngine");
-
-		// Set application icon
-		this.setIconImage(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/org/microemu/icon.png")));
-		
-		// Set professional window properties for better display
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setResizable(true);
-		setLocationRelativeTo(null); // Center on screen
-
-		addWindowListener(windowListener);
-		addWindowFocusListener(new java.awt.event.WindowAdapter() {
-            public void windowGainedFocus(java.awt.event.WindowEvent e) {
-                if (devicePanel != null) {
-                    devicePanel.requestFocusInWindow();
-                }
-            }
-        });
-
-		Config.loadConfig(new DeviceEntry("Resizable device", null, org.microemu.device.impl.DeviceImpl.RESIZABLE_LOCATION, true, false), emulatorContext);
-		Logger.setLocationEnabled(Config.isLogConsoleLocationEnabled());
-
-		Rectangle window = Config.getWindow("main", new Rectangle(0, 0, 160, 120));
-		this.setLocation(window.x, window.y);
-
-		getContentPane().add(createContents(getContentPane()), "Center");
+		// Add components in order: menuPanel, deviceComponent, toolbar
+		mainContainer.add(menuPanel);
+		mainContainer.add(deviceComponent);
 
 		this.common = new Common(emulatorContext);
 		this.common.setStatusBarListener(statusBarListener);
 		this.common.setResponseInterfaceListener(responseInterfaceListener);
 		this.common.loadImplementationsFromConfig();
 
-		this.resizeButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent ev) {
-				if (resizeDeviceDisplayDialog == null) {
-					resizeDeviceDisplayDialog = new ResizeDeviceDisplayDialog();
-				}
-				DeviceDisplayImpl deviceDisplay = (DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay();
-				resizeDeviceDisplayDialog.setDeviceDisplaySize(deviceDisplay.getFullWidth(), deviceDisplay
-						.getFullHeight());
-				if (SwingDialogWindow.show(Main.this, "Enter new size...", resizeDeviceDisplayDialog, true)) {
-				    setDeviceSize(deviceDisplay, resizeDeviceDisplayDialog.getDeviceDisplayWidth(), resizeDeviceDisplayDialog.getDeviceDisplayHeight());
-					pack();
-					devicePanel.requestFocus();
-				}
-			}
+		// Menu button toggles menuPanel
+		btnMenu.addActionListener(e -> {
+			menuPanel.setVisible(!menuPanel.isVisible());
+			mainContainer.revalidate();
+			mainContainer.repaint();
 		});
+		toolbar.add(btnMenu, 0);
+		toolbar.addSeparator();
+		// Quick-access buttons (right side)
+		JButton btnLog = new JButton("Log");
+		btnLog.setToolTipText("Show Log Console");
+		btnLog.addActionListener(menuLogConsoleListener);
+		toolbar.add(btnLog);
+		JButton btnRecordStore = new JButton("Record Store");
+		btnRecordStore.setToolTipText("Show Record Store Manager");
+		btnRecordStore.addActionListener(menuRecordStoreManagerListener);
+		toolbar.add(btnRecordStore);
+		JButton btnHelp = new JButton("Help");
+		btnHelp.setToolTipText("About");
+		btnHelp.addActionListener(menuAboutListener);
+		toolbar.add(btnHelp);
+		JButton btnExit = new JButton("Exit");
+		btnExit.setToolTipText("Exit Emulator");
+		btnExit.addActionListener(menuExitListener);
+		toolbar.add(btnExit);
+		toolbar.add(Box.createHorizontalGlue());
+		toolbar.add(upTimerLabel);
 
-		JPanel statusPanel = new JPanel();
-		statusPanel.setLayout(new BorderLayout());
-		statusPanel.add(statusBar, "West");
-		statusPanel.add(this.resizeButton, "East");
+		// Add toolbar to the main container (at the very bottom)
+		mainContainer.add(toolbar);
 
-		getContentPane().add(statusPanel, "South");
+		// Set the main container as the content pane
+		setContentPane(mainContainer);
+
+		// Status bar (optional, can be merged with toolbar)
+		statusBar.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+		// Note: Status bar is now part of the main container layout
 
 		Message.addListener(new SwingErrorMessageDialogPanel(this));
-
 		devicePanel.setTransferHandler(new DropTransferHandler());
-
-		perfDoubleBuffering.addActionListener(e -> {
-		    devicePanel.setDoubleBuffered(perfDoubleBuffering.isSelected());
-		});
-		perfDoubleBuffering.setSelected(devicePanel.isDoubleBuffered());
-
-		perfMinimizeRepaints.addActionListener(e -> {
-		    SwingDeviceComponent.setMinimizeRepaints(perfMinimizeRepaints.isSelected());
-		});
-		perfMinimizeRepaints.setSelected(SwingDeviceComponent.isMinimizeRepaints());
-
-		perfImageCaching.addActionListener(e -> {
-		    SwingDeviceComponent.setImageCaching(perfImageCaching.isSelected());
-		});
-		perfImageCaching.setSelected(SwingDeviceComponent.isImageCaching());
-
-		perfThreadPriority.addActionListener(e -> {
-		    MIDletThread.setHighPriority(perfThreadPriority.isSelected());
-		});
-		perfThreadPriority.setSelected(MIDletThread.isHighPriority());
-
-		perfObjectPooling.addActionListener(e -> {
-		    SwingDeviceComponent.setObjectPooling(perfObjectPooling.isSelected());
-		});
-		perfObjectPooling.setSelected(SwingDeviceComponent.isObjectPooling());
-
-		menuPersist.addActionListener(e -> {
-		    PersistMode.enabled = menuPersist.isSelected();
-		});
-
-		// Timer toggle
-		menuTimerToggle = new JCheckBoxMenuItem("Timer");
-		menuTimerToggle.setState(true);
-		menuTimerToggle.addActionListener(e -> {
-			boolean enabled = menuTimerToggle.getState();
-			upTimerLabel.setVisible(enabled);
-			if (enabled) {
-				if (upTimerRunning) {
-					upTimer.start();
-				}
-			} else {
-				if (upTimer != null) {
-					upTimer.stop();
-				}
-			}
-		});
-		menuTools.add(menuTimerToggle);
-
-		// Add Update Emulator menu item
-		JMenuItem menuUpdate = new JMenuItem("Update Emulator");
-		menuUpdate.addActionListener(e -> {
-			new SwingWorker<Void, Void>() {
-				protected Void doInBackground() {
-					try {
-						String currentVersion = null;
-						// Try to read version.txt from JAR directory
-						try {
-							File jar = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-							File versionFile = new File(jar.getParentFile(), "version.txt");
-							if (versionFile.exists()) {
-								try (BufferedReader br = new BufferedReader(new FileReader(versionFile))) {
-									currentVersion = br.readLine().trim();
-								}
-							} else {
-								// Try resource
-								try (InputStream in = Main.class.getResourceAsStream("/version.txt")) {
-									if (in != null) {
-										BufferedReader br = new BufferedReader(new InputStreamReader(in));
-										currentVersion = br.readLine().trim();
-									}
-								}
-							}
-						} catch (Exception ex) {
-							// ignore, will show error below
-						}
-						final String currentVersionFinal = currentVersion;
-						if (currentVersionFinal == null) {
-							javax.swing.SwingUtilities.invokeLater(() ->
-								JOptionPane.showMessageDialog(Main.this, "Could not determine current version.", "Update Error", JOptionPane.ERROR_MESSAGE)
-							);
-							return null;
-						}
-						String latestVersion = UpdateChecker.getLatestVersion();
-						final String latestVersionFinal = latestVersion;
-						if (!UpdateChecker.isUpdateAvailable(currentVersionFinal, latestVersionFinal)) {
-							javax.swing.SwingUtilities.invokeLater(() ->
-								JOptionPane.showMessageDialog(Main.this, "You are already running the latest version (" + currentVersionFinal + ").", "No Update Available", JOptionPane.INFORMATION_MESSAGE)
-							);
-							return null;
-						}
-						int confirm = JOptionPane.showConfirmDialog(Main.this, "A new version (" + latestVersionFinal + ") is available. Update now?", "Update Available", JOptionPane.YES_NO_OPTION);
-						if (confirm != JOptionPane.YES_OPTION) return null;
-						File jar = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-						File dest = new File(jar.getParentFile(), "JarEngine-" + latestVersionFinal + ".jar.download");
-						final File destFinal = dest;
-						javax.swing.SwingUtilities.invokeLater(() ->
-							JOptionPane.showMessageDialog(Main.this, "Downloading update...\nThis may take a moment.", "Update", JOptionPane.INFORMATION_MESSAGE)
-						);
-						UpdateChecker.downloadUpdate(latestVersionFinal, destFinal);
-						javax.swing.SwingUtilities.invokeLater(() ->
-							JOptionPane.showMessageDialog(Main.this, "Update downloaded. The emulator will now restart.", "Update", JOptionPane.INFORMATION_MESSAGE)
-						);
-						UpdateChecker.applyUpdateAndRestart(destFinal, latestVersionFinal);
-					} catch (Exception ex) {
-						javax.swing.SwingUtilities.invokeLater(() ->
-							JOptionPane.showMessageDialog(Main.this, "Update failed: " + ex.getMessage(), "Update Error", JOptionPane.ERROR_MESSAGE)
-						);
-					}
-					return null;
-				}
-			}.execute();
-		});
-		menuOptions.add(menuUpdate);
 	}
 
 	// Method to update title when MIDlet is loaded
@@ -1270,10 +958,8 @@ public class Main extends JFrame {
 		devicePanel.init();
 		if (((DeviceDisplayImpl) DeviceFactory.getDevice().getDeviceDisplay()).isResizable()) {
 			setResizable(true);
-			resizeButton.setVisible(true);
 		} else {
 			setResizable(false);
-			resizeButton.setVisible(false);
 		}
 
 		pack();
@@ -1326,11 +1012,9 @@ public class Main extends JFrame {
 
 		if (Config.isWindowOnStart("logConsole")) {
 			app.menuLogConsoleListener.actionPerformed(null);
-			app.menuLogConsole.setSelected(true);
 		}
 		if (Config.isWindowOnStart("recordStoreManager")) {
 			app.menuRecordStoreManagerListener.actionPerformed(null);
-			app.menuRecordStoreManager.setSelected(true);
 		}
 
 		String midletString;

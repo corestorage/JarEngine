@@ -29,7 +29,13 @@ package javax.microedition.io;
 import java.io.IOException;
 
 import javax.microedition.pki.Certificate;
+import org.junit.Ignore;
 
+/**
+ * Disabled by default: This test depends on external network resources and may hang or fail if the server is unreachable.
+ * Remove or comment out @Ignore to run as an integration test.
+ */
+@Ignore
 public class HttpsConnectionTest extends BaseTestHttpConnection {
 	
 	private static final String testInetHTTPUrl = "https://" + TEST_HOST + testFile;

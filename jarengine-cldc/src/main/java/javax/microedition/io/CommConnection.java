@@ -24,10 +24,10 @@
 
 package javax.microedition.io;
 
-import java.io.IOException;
+public interface CommConnection extends StreamConnection {
 
-public interface SecureConnection extends SocketConnection {
-
-	public SecurityInfo getSecurityInfo() throws IOException;
+	public int getBaudRate();
 	
-}
+	public int setBaudRate(int baudrate);
+	
+} 

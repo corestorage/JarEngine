@@ -1,0 +1,8 @@
+plugins {
+    id 'java-library'
+}
+
+dependencies {
+    api project(':jarengine-midp')
+    implementation 'asm:asm:3.1'
+} 

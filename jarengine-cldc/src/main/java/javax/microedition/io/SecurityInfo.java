@@ -12,4 +12,4 @@ public interface SecurityInfo {
 	
 	public String getCipherSuite();
 	
-}
+} 

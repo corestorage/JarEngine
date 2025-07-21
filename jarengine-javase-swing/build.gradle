@@ -1,0 +1,23 @@
+plugins {
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+mainClassName = 'org.microemu.app.Main'
+
+application {
+    mainClass = mainClassName
+}
+
+dependencies {
+    implementation project(':jarengine-javase')
+    implementation 'com.formdev:flatlaf:3.4'
+}
+
+shadowJar {
+    archiveBaseName.set('JarEngine')
+    archiveVersion.set('1.0.0')
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+} 

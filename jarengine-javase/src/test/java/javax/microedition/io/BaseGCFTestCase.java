@@ -35,7 +35,7 @@ import junit.framework.TestCase;
  * @author vlads
  *
  */
-public class BaseGCFTestCase extends TestCase {
+public abstract class BaseGCFTestCase extends TestCase {
 
 	/**
 	 * This is the server where I keep HTTPS and Socket test response server.

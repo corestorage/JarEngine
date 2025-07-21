@@ -24,10 +24,12 @@
 
 package javax.microedition.io;
 
-public interface CommConnection extends StreamConnection {
+import java.io.IOException;
 
-	public int getBaudRate();
+public interface UDPDatagramConnection extends DatagramConnection {
 	
-	public int setBaudRate(int baudrate);
+	public String getLocalAddress() throws IOException;
 	
-}
+	public int getLocalPort() throws IOException;
+
+} 

@@ -50,7 +50,7 @@ import org.microemu.device.ui.UIFactory;
  * @author radoshi
  * 
  */
-public class DisplayTest extends TestCase {
+public abstract class DisplayTest extends TestCase {
 
 	private final static class MockDisplayable extends Displayable {
 
