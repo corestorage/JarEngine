@@ -119,6 +119,10 @@ public class TextField extends Item
 		} else {
 			setString("");
 		}
+		// Sync Swing UI if present
+		if (ui instanceof org.jarengine.device.ui.TextFieldUI) {
+			((org.jarengine.device.ui.TextFieldUI) ui).syncWithTextField(this);
+		}
 		stringComponent.setWidthDecreaser(8);
 	}
 

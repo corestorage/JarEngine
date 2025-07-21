@@ -103,10 +103,16 @@ import org.jarengine.log.QueueAppender;
 import org.jarengine.util.JadMidletEntry;
 
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JPopupMenu;
 
 // Remove FlatLaf import
 // import com.formdev.flatlaf.FlatLightLaf;
 import org.jarengine.app.ui.swing.SwingSelectDevicePanel;
+import org.jarengine.app.ui.swing.RecordStoreChangePanel;
+import org.jarengine.device.j2se.ui.J2SETextBoxUI;
+import org.jarengine.device.j2se.ui.J2SETextFieldUI;
 
 public class Main extends JFrame {
 
@@ -456,7 +462,6 @@ public class Main extends JFrame {
 	private ResponseInterfaceListener responseInterfaceListener = new ResponseInterfaceListener() {
 		public void stateChanged(boolean state) {
 			// Remove menu field references - these will be handled by toolbar buttons
-			
 			// Update window title when MIDlet is loaded/unloaded
 			if (state) {
 				// MIDlet is loaded, update title with MIDlet name
@@ -474,6 +479,24 @@ public class Main extends JFrame {
 			} else {
 				// No MIDlet loaded, show default title
 				updateTitle(null);
+			}
+			// Restore natural focus logic: just update the window title and focus devicePanel
+			if (state) {
+				try {
+					String midletName = common.getAppProperty("MIDlet-Name");
+					if (midletName != null && !midletName.trim().isEmpty()) {
+						updateTitle(midletName);
+					} else {
+						updateTitle(null);
+					}
+				} catch (Exception e) {
+					updateTitle(null);
+				}
+			} else {
+				updateTitle(null);
+			}
+			if (devicePanel != null && devicePanel.getDisplayComponent() instanceof org.jarengine.app.ui.swing.SwingDisplayComponent) {
+				((org.jarengine.app.ui.swing.SwingDisplayComponent) devicePanel.getDisplayComponent()).ensureDevicePanelFocus();
 			}
 		}
 	};
@@ -517,6 +540,11 @@ public class Main extends JFrame {
                     devicePanel.requestFocusInWindow();
                 }
             }
+            public void windowActivated(java.awt.event.WindowEvent e) {
+                if (devicePanel != null) {
+                    devicePanel.requestFocusInWindow();
+                }
+            }
         });
 
         // Device selection panel
@@ -553,6 +581,108 @@ public class Main extends JFrame {
         // Add horizontal glue to push future items to the right
         bottomPanel.add(Box.createHorizontalGlue());
 
+        // --- Add JPopupMenu for Run button ---
+        JPopupMenu runMenu = new JPopupMenu();
+        ButtonGroup runGroup = new ButtonGroup();
+        JRadioButtonMenuItem openMidletItem = new JRadioButtonMenuItem("Open MIDlet File");
+        openMidletItem.addActionListener(menuOpenMIDletFileListener);
+        runGroup.add(openMidletItem);
+        runMenu.add(openMidletItem);
+        JRadioButtonMenuItem closeMidletItem = new JRadioButtonMenuItem("Close MIDlet");
+        closeMidletItem.addActionListener(menuCloseMidletListener);
+        runGroup.add(closeMidletItem);
+        runMenu.add(closeMidletItem);
+        JRadioButtonMenuItem saveForWebItem = new JRadioButtonMenuItem("Save for Web");
+        saveForWebItem.addActionListener(menuSaveForWebListener);
+        runGroup.add(saveForWebItem);
+        runMenu.add(saveForWebItem);
+        JRadioButtonMenuItem startCaptureItem = new JRadioButtonMenuItem("Start Capture");
+        startCaptureItem.addActionListener(menuStartCaptureListener);
+        runGroup.add(startCaptureItem);
+        runMenu.add(startCaptureItem);
+        runButton.addActionListener(e -> {
+            runMenu.show(runButton, 0, -runMenu.getPreferredSize().height);
+            runMenu.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+                public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {}
+                public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {
+                    if (devicePanel != null) devicePanel.requestFocusInWindow();
+                }
+                public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {
+                    if (devicePanel != null) devicePanel.requestFocusInWindow();
+                }
+            });
+        });
+
+        // --- Add JPopupMenu for Menu button ---
+        JPopupMenu menuMenu = new JPopupMenu();
+        ButtonGroup menuGroup = new ButtonGroup();
+        JRadioButtonMenuItem stopCaptureItem = new JRadioButtonMenuItem("Stop Capture");
+        stopCaptureItem.addActionListener(menuStopCaptureListener);
+        menuGroup.add(stopCaptureItem);
+        menuMenu.add(stopCaptureItem);
+        JRadioButtonMenuItem midletNetworkItem = new JRadioButtonMenuItem("MIDlet Network Connection");
+        midletNetworkItem.addActionListener(menuMIDletNetworkConnectionListener);
+        menuGroup.add(midletNetworkItem);
+        menuMenu.add(midletNetworkItem);
+        JRadioButtonMenuItem recordStoreManagerItem = new JRadioButtonMenuItem("Record Store Manager");
+        recordStoreManagerItem.addActionListener(menuRecordStoreManagerListener);
+        menuGroup.add(recordStoreManagerItem);
+        menuMenu.add(recordStoreManagerItem);
+        JRadioButtonMenuItem aboutItem = new JRadioButtonMenuItem("About");
+        aboutItem.addActionListener(menuAboutListener);
+        menuGroup.add(aboutItem);
+        menuMenu.add(aboutItem);
+        JRadioButtonMenuItem exitItem = new JRadioButtonMenuItem("Exit");
+        exitItem.addActionListener(menuExitListener);
+        menuGroup.add(exitItem);
+        menuMenu.add(exitItem);
+        JRadioButtonMenuItem scaledDisplayItem = new JRadioButtonMenuItem("Scaled Display");
+        scaledDisplayItem.addActionListener(menuScaledDisplayListener);
+        menuGroup.add(scaledDisplayItem);
+        menuMenu.add(scaledDisplayItem);
+        JRadioButtonMenuItem proxySettingsItem = new JRadioButtonMenuItem("Proxy Settings");
+        proxySettingsItem.addActionListener(e -> {
+            ProxySettingsDialog dialog = new ProxySettingsDialog(Main.this);
+            dialog.setVisible(true);
+        });
+        menuGroup.add(proxySettingsItem);
+        menuMenu.add(proxySettingsItem);
+        JRadioButtonMenuItem deviceSelectionItem = new JRadioButtonMenuItem("Device Selection");
+        deviceSelectionItem.addActionListener(e -> {
+            selectDevicePanel.setVisible(true);
+        });
+        menuGroup.add(deviceSelectionItem);
+        menuMenu.add(deviceSelectionItem);
+        JRadioButtonMenuItem logConsoleItem = new JRadioButtonMenuItem("Log Console");
+        logConsoleItem.addActionListener(e -> {
+            org.jarengine.app.ui.swing.SwingLogConsoleDialog logDialog = new org.jarengine.app.ui.swing.SwingLogConsoleDialog((java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(Main.this), logQueueAppender);
+            logDialog.setVisible(true);
+        });
+        menuGroup.add(logConsoleItem);
+        menuMenu.add(logConsoleItem);
+        JRadioButtonMenuItem changeRecordStoreTypeItem = new JRadioButtonMenuItem("Change Record Store Type");
+        changeRecordStoreTypeItem.addActionListener(e -> {
+            if (recordStoreManagerDialog == null) {
+                recordStoreManagerDialog = new RecordStoreManagerDialog(Main.this, common);
+            }
+            RecordStoreChangePanel panel = new RecordStoreChangePanel(common);
+            org.jarengine.app.ui.swing.SwingDialogWindow.show(Main.this, "Change Record Store...", panel, true);
+        });
+        menuGroup.add(changeRecordStoreTypeItem);
+        menuMenu.add(changeRecordStoreTypeItem);
+        menuButton.addActionListener(e -> {
+            menuMenu.show(menuButton, 0, -menuMenu.getPreferredSize().height);
+            menuMenu.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
+                public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {}
+                public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {
+                    if (devicePanel != null) devicePanel.requestFocusInWindow();
+                }
+                public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {
+                    if (devicePanel != null) devicePanel.requestFocusInWindow();
+                }
+            });
+        });
+
         mainContainer.add(bottomPanel, BorderLayout.SOUTH);
         setContentPane(mainContainer);
 
@@ -560,6 +690,12 @@ public class Main extends JFrame {
         devicePanel.setTransferHandler(new DropTransferHandler());
 
         this.common = new Common(emulatorContext);
+        // Ensure focus on devicePanel when window is shown
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentShown(java.awt.event.ComponentEvent e) {
+                if (devicePanel != null) devicePanel.requestFocusInWindow();
+            }
+        });
 	}
 
 	// Method to update title when MIDlet is loaded

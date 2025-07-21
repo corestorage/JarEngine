@@ -27,6 +27,8 @@
 package org.jarengine.device.j2se.ui;
 
 import javax.microedition.lcdui.TextBox;
+import javax.swing.JTextArea;
+import java.awt.Component;
 
 import org.jarengine.device.impl.ui.DisplayableImplUI;
 import org.jarengine.device.ui.TextBoxUI;
@@ -34,9 +36,15 @@ import org.jarengine.device.ui.TextBoxUI;
 public class J2SETextBoxUI extends DisplayableImplUI implements TextBoxUI {
 
 	private String text;
+	private JTextArea editor;
 
 	public J2SETextBoxUI(TextBox textBox) {
 		super(textBox);
+		editor = new JTextArea();
+		editor.setLineWrap(true);
+		editor.setWrapStyleWord(true);
+		editor.setText(textBox.getString());
+		// Optionally, configure font, size, etc.
 	}
 
 	public int getCaretPosition() {
@@ -62,4 +70,7 @@ public class J2SETextBoxUI extends DisplayableImplUI implements TextBoxUI {
 		// TODO not yet used
 	} 
 
+	public Component getEditorComponent() {
+		return editor;
+	}
 }

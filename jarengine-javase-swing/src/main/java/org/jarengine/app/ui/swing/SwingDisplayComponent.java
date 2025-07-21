@@ -381,4 +381,11 @@ public class SwingDisplayComponent extends JComponent implements DisplayComponen
 
 		return null;
 	}
+
+    // Ensure focus is always set to the device panel after displayable changes
+    public void ensureDevicePanelFocus() {
+        if (deviceComponent != null) {
+            deviceComponent.requestFocusInWindow();
+        }
+    }
 }

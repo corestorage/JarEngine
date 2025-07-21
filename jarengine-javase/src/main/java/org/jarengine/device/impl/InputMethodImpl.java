@@ -94,21 +94,30 @@ public abstract class InputMethodImpl extends InputMethod implements Runnable {
         lastButtonCharIndex = -1;
     }
 	
-	public void pointerPressed(int x, int y) {		
-		if (DeviceFactory.getDevice().hasPointerEvents()) {
-			MIDletBridge.getMIDletAccess().getDisplayAccess().pointerPressed(x, y);
+	public void pointerPressed(int x, int y) {
+		if (DeviceFactory.getDevice() != null && DeviceFactory.getDevice().hasPointerEvents()) {
+			org.jarengine.MIDletAccess ma = MIDletBridge.getMIDletAccess();
+			if (ma != null && ma.getDisplayAccess() != null) {
+				ma.getDisplayAccess().pointerPressed(x, y);
+			}
 		}
 	}
 
 	public void pointerReleased(int x, int y) {
-		if (DeviceFactory.getDevice().hasPointerEvents()) {
-			MIDletBridge.getMIDletAccess().getDisplayAccess().pointerReleased(x, y);
+		if (DeviceFactory.getDevice() != null && DeviceFactory.getDevice().hasPointerEvents()) {
+			org.jarengine.MIDletAccess ma = MIDletBridge.getMIDletAccess();
+			if (ma != null && ma.getDisplayAccess() != null) {
+				ma.getDisplayAccess().pointerReleased(x, y);
+			}
 		}
 	}
 
 	public void pointerDragged(int x, int y) {
-		if (DeviceFactory.getDevice().hasPointerMotionEvents()) {
-			MIDletBridge.getMIDletAccess().getDisplayAccess().pointerDragged(x, y);
+		if (DeviceFactory.getDevice() != null && DeviceFactory.getDevice().hasPointerMotionEvents()) {
+			org.jarengine.MIDletAccess ma = MIDletBridge.getMIDletAccess();
+			if (ma != null && ma.getDisplayAccess() != null) {
+				ma.getDisplayAccess().pointerDragged(x, y);
+			}
 		}
 	}
 	

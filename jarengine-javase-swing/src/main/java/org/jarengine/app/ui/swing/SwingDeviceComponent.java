@@ -674,4 +674,12 @@ public class SwingDeviceComponent extends JPanel implements KeyListener, InputMe
 		requestFocusInWindow();
 	}
 
+    @Override
+    public boolean requestFocusInWindow() {
+        boolean result = super.requestFocusInWindow();
+        if (dc != null) {
+            dc.requestFocusInWindow();
+        }
+        return result;
+    }
 }

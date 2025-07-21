@@ -28,13 +28,19 @@ package org.jarengine.device.j2se.ui;
 
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.TextField;
+import javax.swing.JTextField;
+import java.awt.Component;
 
 import org.jarengine.device.ui.TextFieldUI;
 
 public class J2SETextFieldUI implements TextFieldUI {
 
+	private JTextField editor;
+
 	public J2SETextFieldUI(TextField textField) {
-		// TODO Auto-generated method stub
+		editor = new JTextField();
+		editor.setText("");
+		// Optionally, configure font, size, etc.
 	}
 
 	public void setDefaultCommand(Command cmd) {
@@ -56,6 +62,16 @@ public class J2SETextFieldUI implements TextFieldUI {
 	public String getString() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void syncWithTextField(TextField textField) {
+		String value = textField.getString();
+		editor.setText(value != null ? value : "");
+	}
+
+	public Component getEditorComponent() {
+		return editor;
 	}
 
 }

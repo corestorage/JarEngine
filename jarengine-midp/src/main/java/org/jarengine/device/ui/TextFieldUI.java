@@ -33,5 +33,6 @@ public interface TextFieldUI extends ItemUI {
 	public void setString(String text);
 	
 	public String getString();
-	
+
+	default void syncWithTextField(javax.microedition.lcdui.TextField textField) {}
 }
